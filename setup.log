@@ -1,0 +1,19 @@
+[2025-06-17 14:45:24] INFO: Entered project directory: soccer-fantasy-game
+[2025-06-17 14:45:24] INFO: Installing @radix-ui/react-icons (attempt 1/3)
+[2025-06-17 14:45:25] INFO: Successfully installed @radix-ui/react-icons
+[2025-06-17 14:45:25] INFO: Installing lucide-react (attempt 1/3)
+[2025-06-17 14:45:27] INFO: Successfully installed lucide-react
+[2025-06-17 14:45:27] INFO: Installing class-variance-authority (attempt 1/3)
+[2025-06-17 14:45:28] INFO: Successfully installed class-variance-authority
+[2025-06-17 14:45:28] INFO: Installing clsx (attempt 1/3)
+[2025-06-17 14:45:28] INFO: Successfully installed clsx
+[2025-06-17 14:45:28] INFO: Installing tailwind-merge (attempt 1/3)
+[2025-06-17 14:45:29] INFO: Successfully installed tailwind-merge
+[2025-06-17 14:45:29] INFO: Installing convex (attempt 1/3)
+[2025-06-17 14:45:34] INFO: Successfully installed convex
+[2025-06-17 14:45:34] INFO: Installing @clerk/nextjs (attempt 1/3)
+[2025-06-17 14:45:41] INFO: Successfully installed @clerk/nextjs
+[2025-06-17 14:45:41] INFO: Package installation completed: 7/7 successful
+[2025-06-17 14:45:41] INFO: Installation verification completed successfully
+[2025-06-17 14:45:41] INFO: Setup completed successfully in 51s
+[2025-06-17 14:45:41] INFO: Script execution completed successfully
