@@ -1,4 +1,4 @@
-import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
+import { SignInButton, SignedIn, SignedOut, UserButton, SignOutButton } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
 
 export default function Home() {
@@ -45,6 +45,11 @@ export default function Home() {
             <div className="mt-8 flex items-center justify-center gap-3">
               <span className="text-green-600 font-medium text-lg">✅ Welcome back!</span>
               <UserButton />
+              <SignOutButton>
+                <Button variant="outline" size="sm" className="ml-2">
+                  Sign Out
+                </Button>
+              </SignOutButton>
             </div>
           </SignedIn>
         </div>
@@ -95,8 +100,8 @@ export default function Home() {
               <div className="bg-blue-100 dark:bg-blue-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">⭐</span>
               </div>
-                             <h4 className="font-semibold mb-2 text-gray-800 dark:text-gray-200">Choose Captain</h4>
-               <p className="text-sm text-gray-600 dark:text-gray-400">Double points for your captain&apos;s performance</p>
+              <h4 className="font-semibold mb-2 text-gray-800 dark:text-gray-200">Choose Captain</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Double points for your captain&apos;s performance</p>
             </div>
             
             <div className="text-center">
@@ -125,8 +130,8 @@ export default function Home() {
           
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             <div className="bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl p-6 text-white">
-                             <h3 className="text-xl font-bold mb-2">⚽ Premier League</h3>
-               <p className="text-purple-100">The world&apos;s most exciting league</p>
+              <h3 className="text-xl font-bold mb-2">⚽ Premier League</h3>
+              <p className="text-purple-100">The world&apos;s most exciting league</p>
             </div>
             
             <div className="bg-gradient-to-br from-red-500 to-orange-600 rounded-2xl p-6 text-white">
@@ -135,8 +140,8 @@ export default function Home() {
             </div>
             
             <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white">
-                             <h3 className="text-xl font-bold mb-2">🏆 Champions League</h3>
-               <p className="text-blue-100">Europe&apos;s premier competition</p>
+              <h3 className="text-xl font-bold mb-2">🏆 Champions League</h3>
+              <p className="text-blue-100">Europe&apos;s premier competition</p>
             </div>
           </div>
         </div>
