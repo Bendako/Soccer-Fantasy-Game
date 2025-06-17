@@ -60,7 +60,7 @@ export const getGameweeks = query({
     if (args.season && args.season.length > 0) {
       return await ctx.db
         .query("gameweeks")
-        .withIndex("by_league_season", (q) => q.eq("league", args.league).eq("season", args.season))
+        .withIndex("by_league_season", (q) => q.eq("league", args.league).eq("season", args.season!))
         .collect();
     }
     
