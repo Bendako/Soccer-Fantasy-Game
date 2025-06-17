@@ -1,4 +1,3 @@
-import { SignInButton, SignedIn, SignedOut, UserButton, SignOutButton } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
 
 export default function Home() {
@@ -24,34 +23,16 @@ export default function Home() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <SignedOut>
-              <SignInButton>
-                <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg font-semibold shadow-lg transform hover:scale-105 transition-all">
-                  🚀 Start Playing Free
-                </Button>
-              </SignInButton>
-            </SignedOut>
-            <SignedIn>
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold shadow-lg">
-                ⚡ Build Your Team
-              </Button>
-            </SignedIn>
+            <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg font-semibold shadow-lg transform hover:scale-105 transition-all">
+              ⚡ Build Your Team
+            </Button>
             <Button variant="outline" size="lg" className="border-2 border-gray-300 hover:border-gray-400 px-8 py-4 text-lg">
               📖 Learn How to Play
             </Button>
+            <Button variant="outline" size="lg" className="border-2 border-green-300 hover:border-green-400 text-green-700 hover:text-green-800 px-8 py-4 text-lg">
+              🏆 View Leagues
+            </Button>
           </div>
-          
-          <SignedIn>
-            <div className="mt-8 flex items-center justify-center gap-3">
-              <span className="text-green-600 font-medium text-lg">✅ Welcome back!</span>
-              <UserButton />
-              <SignOutButton>
-                <Button variant="outline" size="sm" className="ml-2">
-                  Sign Out
-                </Button>
-              </SignOutButton>
-            </div>
-          </SignedIn>
         </div>
 
         {/* Key Features Grid */}
@@ -153,19 +134,14 @@ export default function Home() {
             Join thousands of players already building their dream teams
           </p>
           
-          <SignedOut>
-            <SignInButton>
-              <Button size="lg" className="bg-white text-green-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold shadow-lg">
-                🚀 Start Your Journey
-              </Button>
-            </SignInButton>
-          </SignedOut>
-          
-          <SignedIn>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold shadow-lg">
-              ⚡ Create Your Team
+              🚀 Start Your Journey
             </Button>
-          </SignedIn>
+            <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 text-lg font-semibold">
+              📊 View Leaderboards
+            </Button>
+          </div>
         </div>
       </div>
     </main>
