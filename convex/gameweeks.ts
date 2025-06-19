@@ -150,4 +150,43 @@ export const getGameweekWithStats = query({
       upcomingMatches,
     };
   },
+});
+
+// Activate the first gameweek if none is active
+export const activateFirstGameweek = mutation({
+  args: { league: v.string() },
+  handler: async (ctx, args) => {
+    // Check if there's already an active gameweek
+    const activeGameweek = await ctx.db
+      .query("gameweeks")
+      .withIndex("by_active", (q) => q.eq("isActive", true))
+      .filter((q) => q.eq(q.field("league"), args.league))
+      .first();
+    
+    if (activeGameweek) {
+      return activeGameweek;
+    }
+    
+    // Find the first gameweek for this league
+    const firstGameweek = await ctx.db
+      .query("gameweeks")
+      .filter((q) => q.eq(q.field("league"), args.league))
+      .order("asc")
+      .first();
+    
+    if (!firstGameweek) {
+      throw new Error(`No gameweeks found for league: ${args.league}`);
+    }
+    
+    // Activate the first gameweek
+    await ctx.db.patch(firstGameweek._id, {
+      status: "active",
+      isActive: true,
+      // Set deadline to 7 days from now for testing
+      deadline: Date.now() + (7 * 24 * 60 * 60 * 1000),
+      updatedAt: Date.now(),
+    });
+    
+    return await ctx.db.get(firstGameweek._id);
+  },
 }); 

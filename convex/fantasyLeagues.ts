@@ -281,4 +281,55 @@ export const updateLeagueStandings = mutation({
 
     return args.fantasyLeagueId;
   },
+});
+
+// Create a default league for new users
+export const createDefaultLeague = mutation({
+  args: { 
+    userId: v.id("users"),
+    league: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const league = args.league || "premier_league";
+    
+    // Check if user already has leagues
+    const existingMembership = await ctx.db
+      .query("leagueMemberships")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .first();
+    
+    if (existingMembership) {
+      // User already has a league, return it
+      return await ctx.db.get(existingMembership.fantasyLeagueId);
+    }
+    
+    // Create a new public league for this user
+    const leagueId = await ctx.db.insert("fantasyLeagues", {
+      name: `Default ${league.replace('_', ' ').toUpperCase()} League`,
+      type: "public",
+      maxParticipants: 20,
+      currentParticipants: 0,
+      creatorId: args.userId,
+      league: league,
+      status: "active",
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+    
+    // Add user to the league
+    await ctx.db.insert("leagueMemberships", {
+      userId: args.userId,
+      fantasyLeagueId: leagueId,
+      totalPoints: 0,
+      joinedAt: Date.now(),
+    });
+    
+    // Update participant count
+    await ctx.db.patch(leagueId, {
+      currentParticipants: 1,
+      updatedAt: Date.now(),
+    });
+    
+    return await ctx.db.get(leagueId);
+  },
 }); 

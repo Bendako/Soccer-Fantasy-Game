@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMutation } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "../../convex/_generated/api";
@@ -106,10 +106,29 @@ interface TeamFormation {
   [key: string]: Player | null;
 }
 
+interface ExistingTeam {
+  formation: string;
+  players: {
+    goalkeeper: Player;
+    defenders: Player[];
+    midfielders: Player[];
+    forwards: Player[];
+    captain: Player;
+    viceCaptain: Player;
+  };
+  captainId: string;
+  viceCaptainId: string;
+}
+
 interface FormationPitchProps {
   selectedPlayers: Player[];
   onPlayerSelect: (player: Player) => void;
   onRemovePlayer: (playerId: string) => void;
+  userId: Id<"users">;
+  gameweekId: Id<"gameweeks">;
+  fantasyLeagueId: Id<"fantasyLeagues">;
+  existingTeam?: ExistingTeam | null;
+  isDeadlinePassed: boolean;
 }
 
 const positionColors = {
@@ -126,7 +145,14 @@ const positionLabels = {
   FWD: 'FWD'
 };
 
-export default function FormationPitch({ selectedPlayers }: FormationPitchProps) {
+export default function FormationPitch({ 
+  selectedPlayers, 
+  userId, 
+  gameweekId, 
+  fantasyLeagueId, 
+  existingTeam, 
+  isDeadlinePassed 
+}: FormationPitchProps) {
   const [selectedFormation, setSelectedFormation] = useState<string>('4-3-3');
   const [teamFormation, setTeamFormation] = useState<TeamFormation>({});
   const [captain, setCaptain] = useState<string | null>(null);
@@ -143,11 +169,47 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
   const { user } = useUser();
   const saveFantasyTeam = useMutation(api.fantasyTeams.saveFantasyTeam);
 
-  // Constants for testing (in a real app, these would come from props or context)
-  const CURRENT_GAMEWEEK_ID = "jn72b2871ykyj7qxf64mjhyj257j4e77" as Id<"gameweeks">;
-  const CURRENT_LEAGUE_ID = "jh76tcwkk05bjk07s89n8yhmc57j4x59" as Id<"fantasyLeagues">;
-
   const currentFormation = formations[selectedFormation];
+
+  // Load existing team when component mounts or existingTeam changes
+  useEffect(() => {
+    if (existingTeam && existingTeam.players) {
+      const loadedFormation: TeamFormation = {};
+      
+      // Set formation
+      setSelectedFormation(existingTeam.formation);
+      
+      // Load goalkeeper
+      if (existingTeam.players.goalkeeper) {
+        loadedFormation['gk-0'] = existingTeam.players.goalkeeper;
+      }
+      
+      // Load defenders
+      existingTeam.players.defenders.forEach((defender, index) => {
+        if (defender) {
+          loadedFormation[`def-${index}`] = defender;
+        }
+      });
+      
+      // Load midfielders
+      existingTeam.players.midfielders.forEach((midfielder, index) => {
+        if (midfielder) {
+          loadedFormation[`mid-${index}`] = midfielder;
+        }
+      });
+      
+      // Load forwards
+      existingTeam.players.forwards.forEach((forward, index) => {
+        if (forward) {
+          loadedFormation[`fwd-${index}`] = forward;
+        }
+      });
+      
+      setTeamFormation(loadedFormation);
+      setCaptain(existingTeam.captainId);
+      setViceCaptain(existingTeam.viceCaptainId);
+    }
+  }, [existingTeam]);
 
   // Add a function to clear the entire team
   const handleClearTeam = () => {
@@ -179,7 +241,7 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
   };
 
   const handleSaveTeam = async () => {
-    if (!user || !isTeamComplete()) return;
+    if (!user || !isTeamComplete() || isDeadlinePassed) return;
 
     try {
       setIsSaving(true);
@@ -193,21 +255,16 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
       const midfielders = assignedPlayers.filter(p => p.position === 'MID');
       const forwards = assignedPlayers.filter(p => p.position === 'FWD');
 
-      // For now, we'll use placeholder bench players (first available of each position)
-      // In a real implementation, you'd have a separate bench selection UI
+      // For bench players, use first available of each position not in starting XI
       const availableGK = selectedPlayers.filter(p => p.position === 'GK' && p._id !== goalkeeper._id)[0];
       const availableDEF = selectedPlayers.filter(p => p.position === 'DEF' && !defenders.find(d => d._id === p._id))[0];
       const availableMID = selectedPlayers.filter(p => p.position === 'MID' && !midfielders.find(m => m._id === p._id))[0];
       const availableFWD = selectedPlayers.filter(p => p.position === 'FWD' && !forwards.find(f => f._id === p._id))[0];
 
-      // Get user's Convex user ID
-      const userRecord = await fetch('/api/user').then(res => res.json()).catch(() => null);
-      const convexUserId = userRecord?.id || user.id;
-
       await saveFantasyTeam({
-        userId: convexUserId as Id<"users">,
-        gameweekId: CURRENT_GAMEWEEK_ID,
-        fantasyLeagueId: CURRENT_LEAGUE_ID,
+        userId: userId,
+        gameweekId: gameweekId,
+        fantasyLeagueId: fantasyLeagueId,
         formation: selectedFormation,
         
         // Starting XI
@@ -216,7 +273,7 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
         midfielders: midfielders.map(p => p._id as Id<"players">),
         forwards: forwards.map(p => p._id as Id<"players">),
         
-        // Bench (using placeholders for now)
+        // Bench (using available players or defaults)
         benchGoalkeeper: availableGK?._id as Id<"players"> || goalkeeper._id as Id<"players">,
         benchDefender: availableDEF?._id as Id<"players"> || defenders[0]._id as Id<"players">,
         benchMidfielder: availableMID?._id as Id<"players"> || midfielders[0]._id as Id<"players">,
@@ -239,23 +296,19 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
   };
 
   const handleSlotClick = (slotId: string, position: string) => {
-    // Always allow clicking - either to assign a new player or change an existing one
+    if (isDeadlinePassed) return;
     setShowPlayerModal({ show: true, slotId, position });
   };
 
   const handlePlayerAssign = (player: Player) => {
-    // Check if this player (by name and team) is already assigned to any position
+    // Check if this player is already assigned to any position
     const currentPlayerInSlot = teamFormation[showPlayerModal.slotId];
     const isPlayerAlreadyAssigned = Object.values(teamFormation).some(assignedPlayer => 
-      assignedPlayer && 
-      assignedPlayer.name === player.name && 
-      assignedPlayer.realTeam?.shortName === player.realTeam?.shortName
+      assignedPlayer && assignedPlayer._id === player._id
     );
     
     // If player is already assigned and it's not the same slot, don't allow assignment
-    if (isPlayerAlreadyAssigned && (!currentPlayerInSlot || 
-        currentPlayerInSlot.name !== player.name || 
-        currentPlayerInSlot.realTeam?.shortName !== player.realTeam?.shortName)) {
+    if (isPlayerAlreadyAssigned && (!currentPlayerInSlot || currentPlayerInSlot._id !== player._id)) {
       alert(`${player.name} is already assigned to your team!`);
       return;
     }
@@ -268,6 +321,15 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
   };
 
   const handleRemoveFromSlot = (slotId: string) => {
+    if (isDeadlinePassed) return;
+    
+    const playerToRemove = teamFormation[slotId];
+    if (playerToRemove) {
+      // Remove captain/vice-captain status if this player is being removed
+      if (captain === playerToRemove._id) setCaptain(null);
+      if (viceCaptain === playerToRemove._id) setViceCaptain(null);
+    }
+    
     setTeamFormation(prev => {
       const newFormation = { ...prev };
       delete newFormation[slotId];
@@ -276,6 +338,8 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
   };
 
   const handleCaptainSelect = (playerId: string) => {
+    if (isDeadlinePassed) return;
+    
     if (captain === playerId) {
       setCaptain(null);
     } else {
@@ -287,6 +351,8 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
   };
 
   const handleViceCaptainSelect = (playerId: string) => {
+    if (isDeadlinePassed) return;
+    
     if (viceCaptain === playerId) {
       setViceCaptain(null);
     } else {
@@ -298,10 +364,10 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
   };
 
   const getAvailablePlayersForPosition = (position: string) => {
-    // Get all currently assigned player names and teams across all positions
-    const assignedPlayerKeys = Object.values(teamFormation)
+    // Get all currently assigned player IDs
+    const assignedPlayerIds = Object.values(teamFormation)
       .filter(Boolean)
-      .map(player => `${player!.name}-${player!.realTeam?.shortName || 'unknown'}`);
+      .map(player => player!._id);
     
     // Get the current player in the slot we're trying to fill (if any)
     const currentPlayerInSlot = teamFormation[showPlayerModal.slotId];
@@ -311,17 +377,13 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
     return selectedPlayers.filter(player => {
       if (player.position !== position) return false;
       
-      const playerKey = `${player.name}-${player.realTeam?.shortName || 'unknown'}`;
-      
       // If this player is assigned but it's the current player in this slot, allow it
-      if (currentPlayerInSlot && 
-          currentPlayerInSlot.name === player.name && 
-          currentPlayerInSlot.realTeam?.shortName === player.realTeam?.shortName) {
+      if (currentPlayerInSlot && currentPlayerInSlot._id === player._id) {
         return true;
       }
       
-      // Otherwise, exclude already assigned players by name+team
-      return !assignedPlayerKeys.includes(playerKey);
+      // Otherwise, exclude already assigned players
+      return !assignedPlayerIds.includes(player._id);
     });
   };
 
@@ -336,10 +398,11 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
         style={style}
         onClick={() => handleSlotClick(slotId, position)}
         className={`
-          absolute w-14 h-14 sm:w-16 sm:h-16 lg:w-18 lg:h-18 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all transform -translate-x-1/2 -translate-y-1/2 active:scale-95 touch-manipulation
+          absolute w-14 h-14 sm:w-16 sm:h-16 lg:w-18 lg:h-18 rounded-full border-2 flex items-center justify-center transition-all transform -translate-x-1/2 -translate-y-1/2 touch-manipulation
+          ${isDeadlinePassed ? 'cursor-not-allowed opacity-75' : 'cursor-pointer active:scale-95'}
           ${player 
-            ? `${positionColors[position]} text-white shadow-lg hover:scale-105 active:scale-95` 
-            : `border-white/60 border-dashed bg-white/20 hover:bg-white/30 active:bg-white/40`
+            ? `${positionColors[position]} text-white shadow-lg ${!isDeadlinePassed ? 'hover:scale-105' : ''}` 
+            : `border-white/60 border-dashed bg-white/20 ${!isDeadlinePassed ? 'hover:bg-white/30 active:bg-white/40' : ''}`
           }
           ${isCaptain ? 'ring-2 sm:ring-4 ring-yellow-400' : ''}
           ${isViceCaptain ? 'ring-2 sm:ring-4 ring-gray-400' : ''}
@@ -407,6 +470,20 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
 
   return (
     <div className="space-y-4 lg:space-y-6">
+      {/* Deadline Warning */}
+      {isDeadlinePassed && (
+        <div className="bg-red-500/20 border border-red-400/30 rounded-lg p-4">
+          <div className="flex items-center gap-2 text-red-100">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.232 15.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <span className="font-medium">
+              Deadline has passed - team changes are locked
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Formation Selector */}
       <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
@@ -415,7 +492,8 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
             <select
               value={selectedFormation}
               onChange={(e) => setSelectedFormation(e.target.value)}
-              className="px-4 py-3 sm:py-2.5 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-400 text-sm sm:text-base bg-white shadow-sm font-medium text-slate-700 min-h-[44px] touch-manipulation"
+              disabled={isDeadlinePassed}
+              className="px-4 py-3 sm:py-2.5 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-400 text-sm sm:text-base bg-white shadow-sm font-medium text-slate-700 min-h-[44px] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {Object.keys(formations).map(formation => (
                 <option key={formation} value={formation}>
@@ -424,14 +502,16 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
               ))}
             </select>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleClearTeam}
-              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors text-sm"
-            >
-              Clear Team
-            </button>
-          </div>
+          {!isDeadlinePassed && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleClearTeam}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors text-sm"
+              >
+                Clear Team
+              </button>
+            </div>
+          )}
           <div className="text-xs sm:text-sm text-slate-600 flex flex-col sm:flex-row gap-1 sm:gap-2 bg-slate-50 rounded-lg p-2 sm:p-3">
             <span className="font-medium">Formation: <span className="text-emerald-600">{selectedFormation}</span></span>
             <span className="hidden sm:inline text-slate-400">•</span>
@@ -619,19 +699,22 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
                 <div className="flex gap-2 flex-wrap">
                   <button
                     onClick={() => handleCaptainSelect(player._id)}
-                    className={`text-xs px-4 py-3 rounded-lg font-medium transition-colors touch-manipulation min-h-[44px] ${isCaptain ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-900 shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-amber-100 hover:text-amber-700'}`}
+                    disabled={isDeadlinePassed}
+                    className={`text-xs px-4 py-3 rounded-lg font-medium transition-colors touch-manipulation min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed ${isCaptain ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-900 shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-amber-100 hover:text-amber-700'}`}
                   >
                     Captain
                   </button>
                   <button
                     onClick={() => handleViceCaptainSelect(player._id)}
-                    className={`text-xs px-4 py-3 rounded-lg font-medium transition-colors touch-manipulation min-h-[44px] ${isViceCaptain ? 'bg-gradient-to-r from-slate-400 to-slate-500 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                    disabled={isDeadlinePassed}
+                    className={`text-xs px-4 py-3 rounded-lg font-medium transition-colors touch-manipulation min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed ${isViceCaptain ? 'bg-gradient-to-r from-slate-400 to-slate-500 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
                   >
                     Vice
                   </button>
                   <button
                     onClick={() => handleRemoveFromSlot(slotId)}
-                    className="text-xs px-4 py-3 rounded-lg bg-gradient-to-r from-red-500 to-rose-600 text-white hover:from-red-600 hover:to-rose-700 transition-colors shadow-sm font-medium touch-manipulation min-h-[44px]"
+                    disabled={isDeadlinePassed}
+                    className="text-xs px-4 py-3 rounded-lg bg-gradient-to-r from-red-500 to-rose-600 text-white hover:from-red-600 hover:to-rose-700 transition-colors shadow-sm font-medium touch-manipulation min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Remove
                   </button>
@@ -648,9 +731,11 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
           <div>
             <h3 className="font-bold text-slate-800 text-lg">Save Your Team</h3>
             <p className="text-sm text-slate-600">
-              {isTeamComplete() 
-                ? `Team complete! Formation: ${selectedFormation}` 
-                : `Complete your ${selectedFormation} formation and select captain & vice-captain`
+              {isDeadlinePassed 
+                ? 'Deadline has passed - team changes are locked'
+                : isTeamComplete() 
+                  ? `Team complete! Formation: ${selectedFormation}` 
+                  : `Complete your ${selectedFormation} formation and select captain & vice-captain`
               }
             </p>
           </div>
@@ -676,9 +761,9 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
             
             <button
               onClick={handleSaveTeam}
-              disabled={!isTeamComplete() || isSaving || !user}
+              disabled={!isTeamComplete() || isSaving || !user || isDeadlinePassed}
               className={`px-6 py-3 rounded-lg font-semibold transition-all min-h-[44px] touch-manipulation ${
-                isTeamComplete() && user && !isSaving
+                isTeamComplete() && user && !isSaving && !isDeadlinePassed
                   ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 shadow-lg transform hover:scale-105'
                   : 'bg-slate-200 text-slate-500 cursor-not-allowed'
               }`}
