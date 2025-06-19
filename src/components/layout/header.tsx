@@ -27,7 +27,7 @@ export default function Header() {
           <Link href="/leagues" className="text-gray-600 hover:text-gray-900 transition-colors">
             Leagues
           </Link>
-          <Link href="/admin" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
+          <Link href="/admin/seed" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
             Admin
           </Link>
         </nav>
@@ -63,7 +63,7 @@ export default function Header() {
           <Link href="/leagues" className="text-gray-600 hover:text-gray-900 transition-colors">
             Leagues
           </Link>
-          <Link href="/admin" className="text-gray-600 hover:text-gray-900 transition-colors">
+          <Link href="/admin/seed" className="text-gray-600 hover:text-gray-900 transition-colors">
             Admin
           </Link>
         </nav>
