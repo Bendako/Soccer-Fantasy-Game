@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 // Types for our team builder
 interface Player {
@@ -65,6 +66,9 @@ export default function TeamBuilder() {
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Please sign in to build your team</h1>
           <p className="text-gray-600">You need to be signed in to access the team builder.</p>
+          <Link href="/">
+            <Button className="mt-4" variant="outline">← Back to Home</Button>
+          </Link>
         </div>
       </div>
     )
@@ -93,12 +97,30 @@ export default function TeamBuilder() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900 dark:to-emerald-900">
       <div className="container mx-auto px-6 py-8">
         
+        {/* Breadcrumb Navigation */}
+        <div className="mb-6">
+          <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+            <Link href="/" className="hover:text-gray-900 dark:hover:text-gray-200 transition-colors">
+              Home
+            </Link>
+            <span>›</span>
+            <span className="text-gray-900 dark:text-gray-200 font-medium">Team Builder</span>
+          </nav>
+        </div>
+
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-center mb-4 bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
-            ⚽ Build Your Dream Team
-          </h1>
-          <p className="text-center text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
+              ⚽ Build Your Dream Team
+            </h1>
+            <Link href="/">
+              <Button variant="outline" className="hidden sm:flex">
+                ← Back to Home
+              </Button>
+            </Link>
+          </div>
+          <p className="text-center sm:text-left text-gray-600 dark:text-gray-300 max-w-2xl">
             No budget limits. No team restrictions. Pick any players from any club and create your ultimate fantasy team.
           </p>
         </div>
@@ -238,7 +260,7 @@ export default function TeamBuilder() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center gap-4 mb-8">
           <Button size="lg" variant="outline">
             Save as Draft
           </Button>
@@ -252,7 +274,7 @@ export default function TeamBuilder() {
         </div>
 
         {/* Coming Soon Notice */}
-        <div className="mt-8 text-center">
+        <div className="text-center">
           <div className="inline-block bg-blue-100 dark:bg-blue-900 rounded-lg px-6 py-3">
             <p className="text-sm text-blue-800 dark:text-blue-200">
               🚧 Player selection interface coming soon! This is the team builder layout.
