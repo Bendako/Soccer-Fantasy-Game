@@ -7,12 +7,12 @@ import Link from 'next/link'
 export default function Header() {
   return (
     <header className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+      <div className="container mx-auto px-4 py-3 sm:py-4 flex justify-between items-center">
+        <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity touch-manipulation">
           <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">⚽</span>
           </div>
-          <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Fantasy Soccer
           </h1>
         </Link>
@@ -32,18 +32,20 @@ export default function Header() {
           </Link>
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <SignedOut>
             <SignInButton>
-              <Button variant="outline">Sign In</Button>
+              <Button variant="outline" className="min-h-[40px] touch-manipulation text-sm px-3 sm:px-4">
+                Sign In
+              </Button>
             </SignInButton>
           </SignedOut>
           <SignedIn>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <span className="text-sm text-gray-600 hidden sm:block">Welcome back!</span>
               <UserButton />
               <SignOutButton>
-                <Button variant="outline" size="sm" className="ml-2">
+                <Button variant="outline" size="sm" className="min-h-[36px] touch-manipulation text-xs sm:text-sm px-2 sm:px-3">
                   Sign Out
                 </Button>
               </SignOutButton>
@@ -52,18 +54,18 @@ export default function Header() {
         </div>
       </div>
 
-      <div className="md:hidden border-t px-4 py-2">
-        <nav className="flex items-center justify-center space-x-6 text-sm">
-          <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
+      <div className="md:hidden border-t px-4 py-3">
+        <nav className="flex items-center justify-center space-x-4 sm:space-x-6 text-sm">
+          <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors py-2 px-3 rounded touch-manipulation">
             Home
           </Link>
-          <Link href="/team-builder" className="text-gray-600 hover:text-gray-900 transition-colors">
+          <Link href="/team-builder" className="text-gray-600 hover:text-gray-900 transition-colors py-2 px-3 rounded touch-manipulation whitespace-nowrap">
             Team Builder
           </Link>
-          <Link href="/leagues" className="text-gray-600 hover:text-gray-900 transition-colors">
+          <Link href="/leagues" className="text-gray-600 hover:text-gray-900 transition-colors py-2 px-3 rounded touch-manipulation">
             Leagues
           </Link>
-          <Link href="/admin/seed" className="text-gray-600 hover:text-gray-900 transition-colors">
+          <Link href="/admin/seed" className="text-gray-600 hover:text-gray-900 transition-colors py-2 px-3 rounded touch-manipulation">
             Admin
           </Link>
         </nav>

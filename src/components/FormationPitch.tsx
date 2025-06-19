@@ -192,7 +192,6 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
     const player = teamFormation[slotId];
     const isCaptain = player && captain === player._id;
     const isViceCaptain = player && viceCaptain === player._id;
-    const isMobile = window.innerWidth < 768;
 
     return (
       <div
@@ -200,10 +199,10 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
         style={style}
         onClick={() => handleSlotClick(slotId, position)}
         className={`
-          absolute ${isMobile ? 'w-12 h-12' : 'w-16 h-16'} rounded-full border-2 flex items-center justify-center cursor-pointer transition-all transform -translate-x-1/2 -translate-y-1/2
+          absolute w-14 h-14 sm:w-16 sm:h-16 lg:w-18 lg:h-18 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all transform -translate-x-1/2 -translate-y-1/2 active:scale-95 touch-manipulation
           ${player 
-            ? `${positionColors[position]} text-white shadow-lg hover:scale-105` 
-            : `border-white/60 border-dashed bg-white/20 hover:bg-white/30`
+            ? `${positionColors[position]} text-white shadow-lg hover:scale-105 active:scale-95` 
+            : `border-white/60 border-dashed bg-white/20 hover:bg-white/30 active:bg-white/40`
           }
           ${isCaptain ? 'ring-2 sm:ring-4 ring-yellow-400' : ''}
           ${isViceCaptain ? 'ring-2 sm:ring-4 ring-gray-400' : ''}
@@ -213,18 +212,18 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
           <div className="relative w-full h-full flex items-center justify-center">
             {/* Captain/Vice Captain Badge */}
             {isCaptain && (
-              <div className={`absolute -top-1 -right-1 ${isMobile ? 'w-3 h-3 text-xs' : 'w-4 h-4 text-xs'} bg-yellow-400 text-black font-bold rounded-full flex items-center justify-center`}>
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 text-black font-bold rounded-full flex items-center justify-center text-xs">
                 C
               </div>
             )}
             {isViceCaptain && (
-              <div className={`absolute -top-1 -right-1 ${isMobile ? 'w-3 h-3 text-xs' : 'w-4 h-4 text-xs'} bg-gray-400 text-white font-bold rounded-full flex items-center justify-center`}>
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-gray-400 text-white font-bold rounded-full flex items-center justify-center text-xs">
                 V
               </div>
             )}
             
             {/* Player Jersey Number or Initials */}
-            <span className={`${isMobile ? 'text-xs' : 'text-xs'} font-bold`}>
+            <span className="text-xs font-bold">
               {player.jerseyNumber || player.name.split(' ').map(n => n[0]).join('')}
             </span>
           </div>
@@ -279,7 +278,7 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
             <select
               value={selectedFormation}
               onChange={(e) => setSelectedFormation(e.target.value)}
-              className="px-4 py-2.5 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-400 text-sm sm:text-base bg-white shadow-sm font-medium text-slate-700"
+              className="px-4 py-3 sm:py-2.5 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-400 text-sm sm:text-base bg-white shadow-sm font-medium text-slate-700 min-h-[44px] touch-manipulation"
             >
               {Object.keys(formations).map(formation => (
                 <option key={formation} value={formation}>
@@ -300,9 +299,8 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
 
       {/* Soccer Pitch */}
       <div
-        className="relative bg-gradient-to-b from-green-400 to-green-500 rounded-lg shadow-lg overflow-hidden"
+        className="relative bg-gradient-to-b from-green-400 to-green-500 rounded-lg shadow-lg overflow-hidden h-[450px] sm:h-[550px] lg:h-[650px]"
         style={{ 
-          height: window.innerWidth < 768 ? '500px' : '600px',
           backgroundImage: `
             linear-gradient(90deg, rgba(255,255,255,0.1) 50%, transparent 50%),
             linear-gradient(rgba(255,255,255,0.1) 50%, transparent 50%)
@@ -312,10 +310,8 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
       >
         {/* Center Circle */}
         <div 
-          className="absolute border-2 border-white/50 rounded-full"
+          className="absolute border-2 border-white/50 rounded-full w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28"
           style={{
-            width: '120px',
-            height: '120px',
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)'
@@ -324,10 +320,8 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
         
         {/* Center Dot */}
         <div 
-          className="absolute bg-white/70 rounded-full"
+          className="absolute bg-white/70 rounded-full w-2 h-2"
           style={{
-            width: '8px',
-            height: '8px',
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)'
@@ -336,20 +330,16 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
 
         {/* Goal Areas */}
         <div 
-          className="absolute border-2 border-white/50"
+          className="absolute border-2 border-white/50 w-20 h-8 sm:w-24 sm:h-10 lg:w-28 lg:h-12"
           style={{
-            width: '120px',
-            height: '40px',
             top: '10px',
             left: '50%',
             transform: 'translateX(-50%)'
           }}
         />
         <div 
-          className="absolute border-2 border-white/50"
+          className="absolute border-2 border-white/50 w-20 h-8 sm:w-24 sm:h-10 lg:w-28 lg:h-12"
           style={{
-            width: '120px',
-            height: '40px',
             bottom: '10px',
             left: '50%',
             transform: 'translateX(-50%)'
@@ -363,7 +353,7 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
       {/* Team Summary */}
       <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-4 sm:p-6">
         <h3 className="font-bold text-slate-800 mb-4 text-lg">Team Summary</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 text-sm">
           <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg p-3 border border-amber-200">
             <div className="flex items-center gap-2 mb-1">
               <div className="w-3 h-3 rounded-full bg-gradient-to-br from-amber-400 to-orange-500"></div>
@@ -406,15 +396,15 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
       {/* Player Selection Modal */}
       {showPlayerModal.show && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-3xl max-h-[85vh] overflow-y-auto border border-emerald-100">
-            <div className="flex justify-between items-center mb-6">
+          <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-6 w-full max-w-3xl max-h-[85vh] overflow-y-auto border border-emerald-100">
+            <div className="flex justify-between items-center mb-4 sm:mb-6">
               <div>
-                <h3 className="text-xl sm:text-2xl font-bold text-slate-800">Select {showPlayerModal.position}</h3>
+                <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-800">Select {showPlayerModal.position}</h3>
                 <p className="text-sm text-slate-600 mt-1">Choose a player for this position</p>
               </div>
               <button
                 onClick={() => setShowPlayerModal({ show: false, slotId: '', position: '' })}
-                className="text-slate-400 hover:text-slate-600 p-2 hover:bg-slate-100 rounded-full transition-colors"
+                className="text-slate-400 hover:text-slate-600 p-3 hover:bg-slate-100 rounded-full transition-colors touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -426,9 +416,9 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
                 <div
                   key={player._id}
                   onClick={() => handlePlayerAssign(player)}
-                  className="group p-4 border border-slate-200 rounded-xl cursor-pointer hover:border-emerald-300 hover:bg-emerald-50 transition-all duration-200 hover:shadow-md"
+                  className="group p-4 border border-slate-200 rounded-xl cursor-pointer hover:border-emerald-300 hover:bg-emerald-50 transition-all duration-200 hover:shadow-md active:bg-emerald-100 touch-manipulation min-h-[72px] flex items-center"
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-4">
                       <div className={`w-12 h-12 rounded-full ${positionColors[player.position]} text-white text-sm font-bold flex items-center justify-center shadow-lg`}>
                         {player.position}
@@ -465,7 +455,7 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
             const isViceCaptain = viceCaptain === player._id;
             
             return (
-              <div key={slotId} className="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+              <div key={slotId} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow gap-3">
                 <div className="flex items-center gap-4">
                   <div className={`w-10 h-10 rounded-full ${positionColors[player.position]} text-white text-sm font-bold flex items-center justify-center shadow-lg`}>
                     {player.position === 'GK' ? 'GK' : player.position.slice(0, 1)}
@@ -481,22 +471,22 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
                   {isCaptain && <span className="bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-900 text-xs px-3 py-1 rounded-full font-bold shadow-sm">CAPTAIN</span>}
                   {isViceCaptain && <span className="bg-gradient-to-r from-slate-400 to-slate-500 text-white text-xs px-3 py-1 rounded-full font-bold shadow-sm">VICE</span>}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   <button
                     onClick={() => handleCaptainSelect(player._id)}
-                    className={`text-xs px-3 py-2 rounded-lg font-medium transition-colors ${isCaptain ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-900 shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-amber-100 hover:text-amber-700'}`}
+                    className={`text-xs px-4 py-3 rounded-lg font-medium transition-colors touch-manipulation min-h-[44px] ${isCaptain ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-900 shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-amber-100 hover:text-amber-700'}`}
                   >
                     Captain
                   </button>
                   <button
                     onClick={() => handleViceCaptainSelect(player._id)}
-                    className={`text-xs px-3 py-2 rounded-lg font-medium transition-colors ${isViceCaptain ? 'bg-gradient-to-r from-slate-400 to-slate-500 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                    className={`text-xs px-4 py-3 rounded-lg font-medium transition-colors touch-manipulation min-h-[44px] ${isViceCaptain ? 'bg-gradient-to-r from-slate-400 to-slate-500 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
                   >
                     Vice
                   </button>
                   <button
                     onClick={() => handleRemoveFromSlot(slotId)}
-                    className="text-xs px-3 py-2 rounded-lg bg-gradient-to-r from-red-500 to-rose-600 text-white hover:from-red-600 hover:to-rose-700 transition-colors shadow-sm font-medium"
+                    className="text-xs px-4 py-3 rounded-lg bg-gradient-to-r from-red-500 to-rose-600 text-white hover:from-red-600 hover:to-rose-700 transition-colors shadow-sm font-medium touch-manipulation min-h-[44px]"
                   >
                     Remove
                   </button>
