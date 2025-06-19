@@ -4,14 +4,13 @@ import { useState } from 'react'
 import { useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import { Button } from '@/components/ui/button'
-import Link from 'next/link'
+import { useUser } from '@clerk/nextjs'
 
 export default function AdminPage() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   
   const seedDatabase = useMutation(api.seedData.seedDatabase)
-  const clearDatabase = useMutation(api.seedData.clearDatabase)
 
   const handleSeed = async () => {
     setLoading(true)
