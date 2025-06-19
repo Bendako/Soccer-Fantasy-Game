@@ -14,6 +14,7 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as fantasyLeagues from "../fantasyLeagues.js";
+import type * as fantasyTeams from "../fantasyTeams.js";
 import type * as gameweeks from "../gameweeks.js";
 import type * as players from "../players.js";
 import type * as realTeams from "../realTeams.js";
@@ -30,6 +31,7 @@ import type * as users from "../users.js";
  */
 declare const fullApi: ApiFromModules<{
   fantasyLeagues: typeof fantasyLeagues;
+  fantasyTeams: typeof fantasyTeams;
   gameweeks: typeof gameweeks;
   players: typeof players;
   realTeams: typeof realTeams;

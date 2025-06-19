@@ -1,6 +1,10 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useMutation } from "convex/react";
+import { useUser } from "@clerk/nextjs";
+import { api } from "../../convex/_generated/api";
+import type { Id } from "../../convex/_generated/dataModel";
 
 export interface Player {
   _id: string;
@@ -132,6 +136,16 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
     slotId: '',
     position: ''
   });
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  // Convex hooks
+  const { user } = useUser();
+  const saveFantasyTeam = useMutation(api.fantasyTeams.saveFantasyTeam);
+
+  // Constants for testing (in a real app, these would come from props or context)
+  const CURRENT_GAMEWEEK_ID = "jn72b2871ykyj7qxf64mjhyj257j4e77" as Id<"gameweeks">;
+  const CURRENT_LEAGUE_ID = "jh76tcwkk05bjk07s89n8yhmc57j4x59" as Id<"fantasyLeagues">;
 
   const currentFormation = formations[selectedFormation];
 
@@ -141,6 +155,86 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
       setTeamFormation({});
       setCaptain(null);
       setViceCaptain(null);
+    }
+  };
+
+  // Validate if team is complete and ready to save
+  const isTeamComplete = () => {
+    const formation = formations[selectedFormation];
+    const assignedPlayers = Object.values(teamFormation).filter(p => p !== null);
+    
+    const gkCount = assignedPlayers.filter(p => p?.position === 'GK').length;
+    const defCount = assignedPlayers.filter(p => p?.position === 'DEF').length;
+    const midCount = assignedPlayers.filter(p => p?.position === 'MID').length;
+    const fwdCount = assignedPlayers.filter(p => p?.position === 'FWD').length;
+    
+    return (
+      gkCount === 1 &&
+      defCount === formation.positions.defenders.length &&
+      midCount === formation.positions.midfielders.length &&
+      fwdCount === formation.positions.forwards.length &&
+      captain !== null &&
+      viceCaptain !== null
+    );
+  };
+
+  const handleSaveTeam = async () => {
+    if (!user || !isTeamComplete()) return;
+
+    try {
+      setIsSaving(true);
+      setSaveStatus('idle');
+
+      // Organize players by position for the API
+      const assignedPlayers = Object.values(teamFormation).filter(p => p !== null) as Player[];
+      
+      const goalkeeper = assignedPlayers.find(p => p.position === 'GK')!;
+      const defenders = assignedPlayers.filter(p => p.position === 'DEF');
+      const midfielders = assignedPlayers.filter(p => p.position === 'MID');
+      const forwards = assignedPlayers.filter(p => p.position === 'FWD');
+
+      // For now, we'll use placeholder bench players (first available of each position)
+      // In a real implementation, you'd have a separate bench selection UI
+      const availableGK = selectedPlayers.filter(p => p.position === 'GK' && p._id !== goalkeeper._id)[0];
+      const availableDEF = selectedPlayers.filter(p => p.position === 'DEF' && !defenders.find(d => d._id === p._id))[0];
+      const availableMID = selectedPlayers.filter(p => p.position === 'MID' && !midfielders.find(m => m._id === p._id))[0];
+      const availableFWD = selectedPlayers.filter(p => p.position === 'FWD' && !forwards.find(f => f._id === p._id))[0];
+
+      // Get user's Convex user ID
+      const userRecord = await fetch('/api/user').then(res => res.json()).catch(() => null);
+      const convexUserId = userRecord?.id || user.id;
+
+      await saveFantasyTeam({
+        userId: convexUserId as Id<"users">,
+        gameweekId: CURRENT_GAMEWEEK_ID,
+        fantasyLeagueId: CURRENT_LEAGUE_ID,
+        formation: selectedFormation,
+        
+        // Starting XI
+        goalkeeper: goalkeeper._id as Id<"players">,
+        defenders: defenders.map(p => p._id as Id<"players">),
+        midfielders: midfielders.map(p => p._id as Id<"players">),
+        forwards: forwards.map(p => p._id as Id<"players">),
+        
+        // Bench (using placeholders for now)
+        benchGoalkeeper: availableGK?._id as Id<"players"> || goalkeeper._id as Id<"players">,
+        benchDefender: availableDEF?._id as Id<"players"> || defenders[0]._id as Id<"players">,
+        benchMidfielder: availableMID?._id as Id<"players"> || midfielders[0]._id as Id<"players">,
+        benchForward: availableFWD?._id as Id<"players"> || forwards[0]._id as Id<"players">,
+        
+        // Captain system
+        captainId: captain as Id<"players">,
+        viceCaptainId: viceCaptain as Id<"players">,
+      });
+
+      setSaveStatus('success');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+    } catch (error) {
+      console.error('Error saving team:', error);
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus('idle'), 5000);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -546,6 +640,68 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
             );
           })}
         </div>
+      </div>
+
+      {/* Save Team Section */}
+      <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <h3 className="font-bold text-slate-800 text-lg">Save Your Team</h3>
+            <p className="text-sm text-slate-600">
+              {isTeamComplete() 
+                ? `Team complete! Formation: ${selectedFormation}` 
+                : `Complete your ${selectedFormation} formation and select captain & vice-captain`
+              }
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            {saveStatus === 'success' && (
+              <div className="flex items-center gap-2 text-green-600 text-sm font-medium">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Team saved!
+              </div>
+            )}
+            
+            {saveStatus === 'error' && (
+              <div className="flex items-center gap-2 text-red-600 text-sm font-medium">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Save failed
+              </div>
+            )}
+            
+            <button
+              onClick={handleSaveTeam}
+              disabled={!isTeamComplete() || isSaving || !user}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all min-h-[44px] touch-manipulation ${
+                isTeamComplete() && user && !isSaving
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 shadow-lg transform hover:scale-105'
+                  : 'bg-slate-200 text-slate-500 cursor-not-allowed'
+              }`}
+            >
+              {isSaving ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Saving...
+                </div>
+              ) : (
+                'Save Team'
+              )}
+            </button>
+          </div>
+        </div>
+        
+        {!user && (
+          <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <p className="text-amber-800 text-sm">
+              Please sign in to save your team.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
