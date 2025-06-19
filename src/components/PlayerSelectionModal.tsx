@@ -83,16 +83,10 @@ export function PlayerSelectionModal({
     positionFilter
   });
 
-  // Filter out already selected players (by name+team to handle duplicates)
+  // Filter out already selected players
   const availablePlayers = displayPlayers?.filter(player => {
-    // Get the selected players from props
-    const selectedPlayers = preloadedPlayers?.filter(p => selectedPlayerIds.includes(p._id)) || [];
-    
-    // Check if this player is already selected by name and team
-    return !selectedPlayers.some(selectedPlayer => 
-      selectedPlayer.name === player.name && 
-      selectedPlayer.realTeam?.shortName === player.realTeam?.shortName
-    );
+    // Simply check if this player's ID is already in the selectedPlayerIds array
+    return !selectedPlayerIds.includes(player._id);
   });
 
   console.log("Available players after filtering selected:", availablePlayers?.length);

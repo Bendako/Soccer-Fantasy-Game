@@ -135,12 +135,37 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
 
   const currentFormation = formations[selectedFormation];
 
+  // Add a function to clear the entire team
+  const handleClearTeam = () => {
+    if (confirm('Are you sure you want to clear your entire team?')) {
+      setTeamFormation({});
+      setCaptain(null);
+      setViceCaptain(null);
+    }
+  };
+
   const handleSlotClick = (slotId: string, position: string) => {
     // Always allow clicking - either to assign a new player or change an existing one
     setShowPlayerModal({ show: true, slotId, position });
   };
 
   const handlePlayerAssign = (player: Player) => {
+    // Check if this player (by name and team) is already assigned to any position
+    const currentPlayerInSlot = teamFormation[showPlayerModal.slotId];
+    const isPlayerAlreadyAssigned = Object.values(teamFormation).some(assignedPlayer => 
+      assignedPlayer && 
+      assignedPlayer.name === player.name && 
+      assignedPlayer.realTeam?.shortName === player.realTeam?.shortName
+    );
+    
+    // If player is already assigned and it's not the same slot, don't allow assignment
+    if (isPlayerAlreadyAssigned && (!currentPlayerInSlot || 
+        currentPlayerInSlot.name !== player.name || 
+        currentPlayerInSlot.realTeam?.shortName !== player.realTeam?.shortName)) {
+      alert(`${player.name} is already assigned to your team!`);
+      return;
+    }
+
     setTeamFormation(prev => ({
       ...prev,
       [showPlayerModal.slotId]: player
@@ -179,13 +204,31 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
   };
 
   const getAvailablePlayersForPosition = (position: string) => {
-    const assignedPlayerIds = Object.values(teamFormation)
+    // Get all currently assigned player names and teams across all positions
+    const assignedPlayerKeys = Object.values(teamFormation)
       .filter(Boolean)
-      .map(player => player!._id);
+      .map(player => `${player!.name}-${player!.realTeam?.shortName || 'unknown'}`);
     
-    return selectedPlayers.filter(player => 
-      player.position === position && !assignedPlayerIds.includes(player._id)
-    );
+    // Get the current player in the slot we're trying to fill (if any)
+    const currentPlayerInSlot = teamFormation[showPlayerModal.slotId];
+    
+    // Filter players by position and exclude already assigned players
+    // BUT allow the current player in the slot to be shown (for re-selection/confirmation)
+    return selectedPlayers.filter(player => {
+      if (player.position !== position) return false;
+      
+      const playerKey = `${player.name}-${player.realTeam?.shortName || 'unknown'}`;
+      
+      // If this player is assigned but it's the current player in this slot, allow it
+      if (currentPlayerInSlot && 
+          currentPlayerInSlot.name === player.name && 
+          currentPlayerInSlot.realTeam?.shortName === player.realTeam?.shortName) {
+        return true;
+      }
+      
+      // Otherwise, exclude already assigned players by name+team
+      return !assignedPlayerKeys.includes(playerKey);
+    });
   };
 
   const renderPlayerSlot = (slotId: string, position: 'GK' | 'DEF' | 'MID' | 'FWD', style: React.CSSProperties) => {
@@ -286,6 +329,14 @@ export default function FormationPitch({ selectedPlayers }: FormationPitchProps)
                 </option>
               ))}
             </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleClearTeam}
+              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors text-sm"
+            >
+              Clear Team
+            </button>
           </div>
           <div className="text-xs sm:text-sm text-slate-600 flex flex-col sm:flex-row gap-1 sm:gap-2 bg-slate-50 rounded-lg p-2 sm:p-3">
             <span className="font-medium">Formation: <span className="text-emerald-600">{selectedFormation}</span></span>

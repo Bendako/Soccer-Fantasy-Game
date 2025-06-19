@@ -26,6 +26,11 @@ export default defineSchema({
       primary: v.string(),
       secondary: v.string(),
     })),
+    // Additional optional fields that might exist in database
+    externalId: v.optional(v.string()),
+    founded: v.optional(v.number()),
+    venue: v.optional(v.string()),
+    website: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -46,6 +51,10 @@ export default defineSchema({
     totalAssists: v.number(),
     totalPoints: v.number(),
     averagePoints: v.number(),
+    // Additional optional fields that might exist in database
+    minutesPlayed: v.optional(v.number()),
+    price: v.optional(v.number()),
+    form: v.optional(v.array(v.number())),
     createdAt: v.number(),
     updatedAt: v.number(),
   })

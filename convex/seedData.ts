@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 
 // Seed data for Premier League teams
@@ -252,6 +252,92 @@ export const checkSeededData = mutation({
       teams: teamCount.length,
       players: playerCount.length,
       isSeeded: teamCount.length > 0 && playerCount.length > 0,
+    };
+  },
+});
+
+// Helper mutation to clean up duplicate players
+export const cleanupDuplicatePlayers = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const allPlayers = await ctx.db.query("players").collect();
+    
+    // Group players by name and team to find duplicates
+    const playerGroups = new Map<string, typeof allPlayers>();
+    const duplicatesRemoved: string[] = [];
+    
+    for (const player of allPlayers) {
+      const team = await ctx.db.get(player.realTeamId);
+      const key = `${player.name}-${team?.name || 'unknown'}`;
+      
+      if (!playerGroups.has(key)) {
+        playerGroups.set(key, []);
+      }
+      playerGroups.get(key)!.push(player);
+    }
+    
+    // Remove duplicates (keep the first one, remove the rest)
+    for (const [key, players] of playerGroups) {
+      if (players.length > 1) {
+        console.log(`Found ${players.length} duplicates for ${key}`);
+        // Keep the first player, remove the rest
+        for (let i = 1; i < players.length; i++) {
+          await ctx.db.delete(players[i]._id);
+          duplicatesRemoved.push(`${players[i].name} (${players[i]._id})`);
+        }
+      }
+    }
+    
+    const finalPlayerCount = await ctx.db.query("players").collect();
+    
+    return {
+      duplicatesRemoved: duplicatesRemoved.length,
+      removedPlayers: duplicatesRemoved,
+      originalCount: allPlayers.length,
+      finalCount: finalPlayerCount.length,
+    };
+  },
+});
+
+// Helper query to find duplicate players
+export const findDuplicatePlayers = query({
+  args: {},
+  handler: async (ctx) => {
+    const allPlayers = await ctx.db.query("players").collect();
+    
+    // Group players by name to find duplicates
+    const playerGroups = new Map<string, typeof allPlayers>();
+    
+    for (const player of allPlayers) {
+      const team = await ctx.db.get(player.realTeamId);
+      const key = `${player.name}-${team?.name || 'unknown'}`;
+      
+      if (!playerGroups.has(key)) {
+        playerGroups.set(key, []);
+      }
+      playerGroups.get(key)!.push(player);
+    }
+    
+    // Find groups with duplicates
+    const duplicates: Array<{key: string, count: number, players: typeof allPlayers}> = [];
+    
+    for (const [key, players] of playerGroups) {
+      if (players.length > 1) {
+        duplicates.push({
+          key,
+          count: players.length,
+          players: players.map(p => ({
+            ...p,
+            realTeam: null // We'll add this in the return if needed
+          }))
+        });
+      }
+    }
+    
+    return {
+      totalPlayers: allPlayers.length,
+      duplicateGroups: duplicates.length,
+      duplicates
     };
   },
 }); 
