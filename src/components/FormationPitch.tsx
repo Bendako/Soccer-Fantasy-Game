@@ -109,10 +109,10 @@ interface FormationPitchProps {
 }
 
 const positionColors = {
-  GK: 'bg-yellow-500',
-  DEF: 'bg-blue-500',
-  MID: 'bg-green-500',
-  FWD: 'bg-red-500'
+  GK: 'bg-gradient-to-br from-amber-400 to-orange-500',
+  DEF: 'bg-gradient-to-br from-blue-500 to-indigo-600',
+  MID: 'bg-gradient-to-br from-emerald-500 to-green-600',
+  FWD: 'bg-gradient-to-br from-red-500 to-rose-600'
 };
 
 const positionLabels = {
@@ -122,7 +122,7 @@ const positionLabels = {
   FWD: 'FWD'
 };
 
-export default function FormationPitch({ selectedPlayers, onPlayerSelect: _onPlayerSelect, onRemovePlayer: _onRemovePlayer }: FormationPitchProps) {
+export default function FormationPitch({ selectedPlayers }: FormationPitchProps) {
   const [selectedFormation, setSelectedFormation] = useState<string>('4-3-3');
   const [teamFormation, setTeamFormation] = useState<TeamFormation>({});
   const [captain, setCaptain] = useState<string | null>(null);
@@ -136,10 +136,7 @@ export default function FormationPitch({ selectedPlayers, onPlayerSelect: _onPla
   const currentFormation = formations[selectedFormation];
 
   const handleSlotClick = (slotId: string, position: string) => {
-    if (teamFormation[slotId]) {
-      // Player already assigned, show options to change captain/vice or remove
-      return;
-    }
+    // Always allow clicking - either to assign a new player or change an existing one
     setShowPlayerModal({ show: true, slotId, position });
   };
 
@@ -243,7 +240,7 @@ export default function FormationPitch({ selectedPlayers, onPlayerSelect: _onPla
   };
 
   const renderFormationSlots = () => {
-    const slots = [];
+    const slots: React.ReactElement[] = [];
 
     // Goalkeeper
     currentFormation.positions.goalkeeper.forEach((pos, index) => {
@@ -275,27 +272,29 @@ export default function FormationPitch({ selectedPlayers, onPlayerSelect: _onPla
   return (
     <div className="space-y-4 lg:space-y-6">
       {/* Formation Selector */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <label className="font-semibold text-gray-700 text-sm sm:text-base">Formation:</label>
-          <select
-            value={selectedFormation}
-            onChange={(e) => setSelectedFormation(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
-          >
-            {Object.keys(formations).map(formation => (
-              <option key={formation} value={formation}>
-                {formation}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="text-xs sm:text-sm text-gray-600 flex flex-col sm:flex-row gap-1 sm:gap-2">
-          <span>Formation: {selectedFormation}</span>
-          <span className="hidden sm:inline">•</span>
-          <span>Captain: {captain ? teamFormation[Object.keys(teamFormation).find(key => teamFormation[key]?._id === captain) || '']?.name || 'None' : 'None'}</span>
-          <span className="hidden sm:inline">•</span>
-          <span>Vice: {viceCaptain ? teamFormation[Object.keys(teamFormation).find(key => teamFormation[key]?._id === viceCaptain) || '']?.name || 'None' : 'None'}</span>
+      <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <label className="font-semibold text-slate-700 text-sm sm:text-base">Formation:</label>
+            <select
+              value={selectedFormation}
+              onChange={(e) => setSelectedFormation(e.target.value)}
+              className="px-4 py-2.5 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-400 text-sm sm:text-base bg-white shadow-sm font-medium text-slate-700"
+            >
+              {Object.keys(formations).map(formation => (
+                <option key={formation} value={formation}>
+                  {formation}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="text-xs sm:text-sm text-slate-600 flex flex-col sm:flex-row gap-1 sm:gap-2 bg-slate-50 rounded-lg p-2 sm:p-3">
+            <span className="font-medium">Formation: <span className="text-emerald-600">{selectedFormation}</span></span>
+            <span className="hidden sm:inline text-slate-400">•</span>
+            <span className="font-medium">Captain: <span className="text-amber-600">{captain ? teamFormation[Object.keys(teamFormation).find(key => teamFormation[key]?._id === captain) || '']?.name || 'None' : 'None'}</span></span>
+            <span className="hidden sm:inline text-slate-400">•</span>
+            <span className="font-medium">Vice: <span className="text-slate-600">{viceCaptain ? teamFormation[Object.keys(teamFormation).find(key => teamFormation[key]?._id === viceCaptain) || '']?.name || 'None' : 'None'}</span></span>
+          </div>
         </div>
       </div>
 
@@ -362,30 +361,42 @@ export default function FormationPitch({ selectedPlayers, onPlayerSelect: _onPla
       </div>
 
       {/* Team Summary */}
-      <div className="bg-gray-50 rounded-lg p-4">
-        <h3 className="font-semibold text-gray-800 mb-2">Team Summary</h3>
+      <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-4 sm:p-6">
+        <h3 className="font-bold text-slate-800 mb-4 text-lg">Team Summary</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-          <div>
-            <span className="text-gray-600">Goalkeeper:</span>
-            <span className="ml-1 font-medium">
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg p-3 border border-amber-200">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-3 h-3 rounded-full bg-gradient-to-br from-amber-400 to-orange-500"></div>
+              <span className="text-slate-700 font-medium">Goalkeeper</span>
+            </div>
+            <span className="text-lg font-bold text-amber-700">
               {Object.values(teamFormation).filter(p => p?.position === 'GK').length}/1
             </span>
           </div>
-          <div>
-            <span className="text-gray-600">Defenders:</span>
-            <span className="ml-1 font-medium">
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-200">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-3 h-3 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600"></div>
+              <span className="text-slate-700 font-medium">Defenders</span>
+            </div>
+            <span className="text-lg font-bold text-blue-700">
               {Object.values(teamFormation).filter(p => p?.position === 'DEF').length}/{currentFormation.positions.defenders.length}
             </span>
           </div>
-          <div>
-            <span className="text-gray-600">Midfielders:</span>
-            <span className="ml-1 font-medium">
+          <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-lg p-3 border border-emerald-200">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-3 h-3 rounded-full bg-gradient-to-br from-emerald-500 to-green-600"></div>
+              <span className="text-slate-700 font-medium">Midfielders</span>
+            </div>
+            <span className="text-lg font-bold text-emerald-700">
               {Object.values(teamFormation).filter(p => p?.position === 'MID').length}/{currentFormation.positions.midfielders.length}
             </span>
           </div>
-          <div>
-            <span className="text-gray-600">Forwards:</span>
-            <span className="ml-1 font-medium">
+          <div className="bg-gradient-to-br from-red-50 to-rose-50 rounded-lg p-3 border border-red-200">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-3 h-3 rounded-full bg-gradient-to-br from-red-500 to-rose-600"></div>
+              <span className="text-slate-700 font-medium">Forwards</span>
+            </div>
+            <span className="text-lg font-bold text-red-700">
               {Object.values(teamFormation).filter(p => p?.position === 'FWD').length}/{currentFormation.positions.forwards.length}
             </span>
           </div>
@@ -394,15 +405,20 @@ export default function FormationPitch({ selectedPlayers, onPlayerSelect: _onPla
 
       {/* Player Selection Modal */}
       {showPlayerModal.show && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-base sm:text-lg font-semibold">Select {showPlayerModal.position}</h3>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-3xl max-h-[85vh] overflow-y-auto border border-emerald-100">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-800">Select {showPlayerModal.position}</h3>
+                <p className="text-sm text-slate-600 mt-1">Choose a player for this position</p>
+              </div>
               <button
                 onClick={() => setShowPlayerModal({ show: false, slotId: '', position: '' })}
-                className="text-gray-500 hover:text-gray-700 p-1"
+                className="text-slate-400 hover:text-slate-600 p-2 hover:bg-slate-100 rounded-full transition-colors"
               >
-                ✕
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
             <div className="grid grid-cols-1 gap-3">
@@ -410,11 +426,27 @@ export default function FormationPitch({ selectedPlayers, onPlayerSelect: _onPla
                 <div
                   key={player._id}
                   onClick={() => handlePlayerAssign(player)}
-                  className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                  className="group p-4 border border-slate-200 rounded-xl cursor-pointer hover:border-emerald-300 hover:bg-emerald-50 transition-all duration-200 hover:shadow-md"
                 >
-                  <div className="font-medium text-sm sm:text-base">{player.name}</div>
-                  <div className="text-xs sm:text-sm text-gray-600">
-                    {player.realTeam?.shortName} • {player.totalPoints} pts
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-full ${positionColors[player.position]} text-white text-sm font-bold flex items-center justify-center shadow-lg`}>
+                        {player.position}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-slate-800 text-base group-hover:text-emerald-700 transition-colors">{player.name}</div>
+                        <div className="text-sm text-slate-600 flex items-center gap-2">
+                          <span className="font-medium">{player.realTeam?.shortName}</span>
+                          <span className="text-slate-400">•</span>
+                          <span className="text-emerald-600 font-semibold">{player.totalPoints} pts</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                      <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -424,43 +456,47 @@ export default function FormationPitch({ selectedPlayers, onPlayerSelect: _onPla
       )}
 
       {/* Assigned Players Panel */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
-        <h3 className="font-semibold text-gray-800 mb-3">Assigned Players</h3>
-        <div className="space-y-2">
+      <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-4 sm:p-6">
+        <h3 className="font-bold text-slate-800 mb-4 text-lg">Assigned Players</h3>
+        <div className="space-y-3">
           {Object.entries(teamFormation).map(([slotId, player]) => {
             if (!player) return null;
             const isCaptain = captain === player._id;
             const isViceCaptain = viceCaptain === player._id;
             
             return (
-              <div key={slotId} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full ${positionColors[player.position]} text-white text-xs font-bold flex items-center justify-center`}>
+              <div key={slotId} className="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-4">
+                  <div className={`w-10 h-10 rounded-full ${positionColors[player.position]} text-white text-sm font-bold flex items-center justify-center shadow-lg`}>
                     {player.position === 'GK' ? 'GK' : player.position.slice(0, 1)}
                   </div>
                   <div>
-                    <div className="font-medium">{player.name}</div>
-                    <div className="text-sm text-gray-600">{player.realTeam?.shortName} • {player.totalPoints} pts</div>
+                    <div className="font-semibold text-slate-800">{player.name}</div>
+                    <div className="text-sm text-slate-600 flex items-center gap-2">
+                      <span className="font-medium">{player.realTeam?.shortName}</span>
+                      <span className="text-slate-400">•</span>
+                      <span className="text-emerald-600 font-semibold">{player.totalPoints} pts</span>
+                    </div>
                   </div>
-                  {isCaptain && <span className="bg-yellow-400 text-black text-xs px-2 py-1 rounded font-bold">CAPTAIN</span>}
-                  {isViceCaptain && <span className="bg-gray-400 text-white text-xs px-2 py-1 rounded font-bold">VICE</span>}
+                  {isCaptain && <span className="bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-900 text-xs px-3 py-1 rounded-full font-bold shadow-sm">CAPTAIN</span>}
+                  {isViceCaptain && <span className="bg-gradient-to-r from-slate-400 to-slate-500 text-white text-xs px-3 py-1 rounded-full font-bold shadow-sm">VICE</span>}
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleCaptainSelect(player._id)}
-                    className={`text-xs px-2 py-1 rounded ${isCaptain ? 'bg-yellow-400 text-black' : 'bg-gray-200 hover:bg-yellow-300'}`}
+                    className={`text-xs px-3 py-2 rounded-lg font-medium transition-colors ${isCaptain ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-900 shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-amber-100 hover:text-amber-700'}`}
                   >
                     Captain
                   </button>
                   <button
                     onClick={() => handleViceCaptainSelect(player._id)}
-                    className={`text-xs px-2 py-1 rounded ${isViceCaptain ? 'bg-gray-400 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+                    className={`text-xs px-3 py-2 rounded-lg font-medium transition-colors ${isViceCaptain ? 'bg-gradient-to-r from-slate-400 to-slate-500 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
                   >
                     Vice
                   </button>
                   <button
                     onClick={() => handleRemoveFromSlot(slotId)}
-                    className="text-xs px-2 py-1 rounded bg-red-500 text-white hover:bg-red-600"
+                    className="text-xs px-3 py-2 rounded-lg bg-gradient-to-r from-red-500 to-rose-600 text-white hover:from-red-600 hover:to-rose-700 transition-colors shadow-sm font-medium"
                   >
                     Remove
                   </button>
