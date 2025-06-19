@@ -4,17 +4,29 @@ import { useState } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { PlayerSelectionModal } from '@/components/PlayerSelectionModal'
+import { Id } from '../../convex/_generated/dataModel'
 
 // Types for our team builder
 interface Player {
-  _id: string
+  _id: Id<"players">
   name: string
   position: 'GK' | 'DEF' | 'MID' | 'FWD'
-  realTeam: string
-  imageUrl?: string
+  jerseyNumber?: number
+  totalGoals: number
+  totalAssists: number
   totalPoints: number
+  averagePoints: number
   injured: boolean
   suspended: boolean
+  realTeam: {
+    name: string
+    shortName: string
+    colors?: {
+      primary: string
+      secondary: string
+    }
+  } | null
 }
 
 interface Formation {
@@ -24,6 +36,13 @@ interface Formation {
     midfielders: number
     forwards: number
   }
+}
+
+interface ModalState {
+  isOpen: boolean
+  position: string
+  slotType: 'starting' | 'bench'
+  slotIndex?: number
 }
 
 const formations: Formation[] = [
@@ -37,7 +56,6 @@ const formations: Formation[] = [
 export default function TeamBuilder() {
   const { user } = useUser()
   const [selectedFormation, setSelectedFormation] = useState<Formation>(formations[0])
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedPlayers, setSelectedPlayers] = useState<{
     goalkeeper?: Player
     defenders: Player[]
@@ -55,10 +73,13 @@ export default function TeamBuilder() {
     forwards: [],
     bench: {}
   })
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [captain, setCaptain] = useState<string | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [viceCaptain, setViceCaptain] = useState<string | null>(null)
+  const [modalState, setModalState] = useState<ModalState>({
+    isOpen: false,
+    position: '',
+    slotType: 'starting'
+  })
 
   if (!user) {
     return (
@@ -72,6 +93,105 @@ export default function TeamBuilder() {
         </div>
       </div>
     )
+  }
+
+  const openPlayerSelector = (position: string, slotType: 'starting' | 'bench', slotIndex?: number) => {
+    setModalState({
+      isOpen: true,
+      position,
+      slotType,
+      slotIndex
+    })
+  }
+
+  const closePlayerSelector = () => {
+    setModalState({
+      isOpen: false,
+      position: '',
+      slotType: 'starting'
+    })
+  }
+
+  const handlePlayerSelect = (player: Player) => {
+    const newSelectedPlayers = { ...selectedPlayers }
+
+    if (modalState.slotType === 'starting') {
+      if (modalState.position === 'GK') {
+        newSelectedPlayers.goalkeeper = player
+      } else if (modalState.position === 'DEF') {
+        if (modalState.slotIndex !== undefined) {
+          const newDefenders = [...newSelectedPlayers.defenders]
+          newDefenders[modalState.slotIndex] = player
+          newSelectedPlayers.defenders = newDefenders
+        } else {
+          // Find first empty slot
+          const emptyIndex = newSelectedPlayers.defenders.findIndex((_, i) => !newSelectedPlayers.defenders[i])
+          if (emptyIndex !== -1) {
+            newSelectedPlayers.defenders[emptyIndex] = player
+          } else if (newSelectedPlayers.defenders.length < selectedFormation.positions.defenders) {
+            newSelectedPlayers.defenders.push(player)
+          }
+        }
+      } else if (modalState.position === 'MID') {
+        if (modalState.slotIndex !== undefined) {
+          const newMidfielders = [...newSelectedPlayers.midfielders]
+          newMidfielders[modalState.slotIndex] = player
+          newSelectedPlayers.midfielders = newMidfielders
+        } else {
+          // Find first empty slot
+          const emptyIndex = newSelectedPlayers.midfielders.findIndex((_, i) => !newSelectedPlayers.midfielders[i])
+          if (emptyIndex !== -1) {
+            newSelectedPlayers.midfielders[emptyIndex] = player
+          } else if (newSelectedPlayers.midfielders.length < selectedFormation.positions.midfielders) {
+            newSelectedPlayers.midfielders.push(player)
+          }
+        }
+      } else if (modalState.position === 'FWD') {
+        if (modalState.slotIndex !== undefined) {
+          const newForwards = [...newSelectedPlayers.forwards]
+          newForwards[modalState.slotIndex] = player
+          newSelectedPlayers.forwards = newForwards
+        } else {
+          // Find first empty slot
+          const emptyIndex = newSelectedPlayers.forwards.findIndex((_, i) => !newSelectedPlayers.forwards[i])
+          if (emptyIndex !== -1) {
+            newSelectedPlayers.forwards[emptyIndex] = player
+          } else if (newSelectedPlayers.forwards.length < selectedFormation.positions.forwards) {
+            newSelectedPlayers.forwards.push(player)
+          }
+        }
+      }
+    } else {
+      // Bench selection
+      if (modalState.position === 'GK') {
+        newSelectedPlayers.bench.goalkeeper = player
+      } else if (modalState.position === 'DEF') {
+        newSelectedPlayers.bench.defender = player
+      } else if (modalState.position === 'MID') {
+        newSelectedPlayers.bench.midfielder = player
+      } else if (modalState.position === 'FWD') {
+        newSelectedPlayers.bench.forward = player
+      }
+    }
+
+    setSelectedPlayers(newSelectedPlayers)
+    closePlayerSelector()
+  }
+
+  const getAllSelectedPlayerIds = (): Id<"players">[] => {
+    const ids: Id<"players">[] = []
+    
+    if (selectedPlayers.goalkeeper) ids.push(selectedPlayers.goalkeeper._id)
+    ids.push(...selectedPlayers.defenders.map(p => p._id))
+    ids.push(...selectedPlayers.midfielders.map(p => p._id))
+    ids.push(...selectedPlayers.forwards.map(p => p._id))
+    
+    if (selectedPlayers.bench.goalkeeper) ids.push(selectedPlayers.bench.goalkeeper._id)
+    if (selectedPlayers.bench.defender) ids.push(selectedPlayers.bench.defender._id)
+    if (selectedPlayers.bench.midfielder) ids.push(selectedPlayers.bench.midfielder._id)
+    if (selectedPlayers.bench.forward) ids.push(selectedPlayers.bench.forward._id)
+    
+    return ids
   }
 
   const getTotalPlayers = () => {
@@ -174,7 +294,7 @@ export default function TeamBuilder() {
                 player={selectedPlayers.goalkeeper}
                 isCaptain={captain === selectedPlayers.goalkeeper?._id}
                 isViceCaptain={viceCaptain === selectedPlayers.goalkeeper?._id}
-                onClick={() => {/* TODO: Open player selector */}}
+                onClick={() => openPlayerSelector('GK', 'starting')}
               />
             </div>
 
@@ -188,7 +308,7 @@ export default function TeamBuilder() {
                     player={selectedPlayers.defenders[index]}
                     isCaptain={captain === selectedPlayers.defenders[index]?._id}
                     isViceCaptain={viceCaptain === selectedPlayers.defenders[index]?._id}
-                    onClick={() => {/* TODO: Open player selector */}}
+                    onClick={() => openPlayerSelector('DEF', 'starting', index)}
                   />
                 ))}
               </div>
@@ -204,7 +324,7 @@ export default function TeamBuilder() {
                     player={selectedPlayers.midfielders[index]}
                     isCaptain={captain === selectedPlayers.midfielders[index]?._id}
                     isViceCaptain={viceCaptain === selectedPlayers.midfielders[index]?._id}
-                    onClick={() => {/* TODO: Open player selector */}}
+                    onClick={() => openPlayerSelector('MID', 'starting', index)}
                   />
                 ))}
               </div>
@@ -220,7 +340,7 @@ export default function TeamBuilder() {
                     player={selectedPlayers.forwards[index]}
                     isCaptain={captain === selectedPlayers.forwards[index]?._id}
                     isViceCaptain={viceCaptain === selectedPlayers.forwards[index]?._id}
-                    onClick={() => {/* TODO: Open player selector */}}
+                    onClick={() => openPlayerSelector('FWD', 'starting', index)}
                   />
                 ))}
               </div>
@@ -236,25 +356,25 @@ export default function TeamBuilder() {
               position="GK"
               player={selectedPlayers.bench.goalkeeper}
               label="Bench GK"
-              onClick={() => {/* TODO: Open player selector */}}
+              onClick={() => openPlayerSelector('GK', 'bench')}
             />
             <PlayerSlot
               position="DEF"
               player={selectedPlayers.bench.defender}
               label="Bench DEF"
-              onClick={() => {/* TODO: Open player selector */}}
+              onClick={() => openPlayerSelector('DEF', 'bench')}
             />
             <PlayerSlot
               position="MID"
               player={selectedPlayers.bench.midfielder}
               label="Bench MID"
-              onClick={() => {/* TODO: Open player selector */}}
+              onClick={() => openPlayerSelector('MID', 'bench')}
             />
             <PlayerSlot
               position="FWD"
               player={selectedPlayers.bench.forward}
               label="Bench FWD"
-              onClick={() => {/* TODO: Open player selector */}}
+              onClick={() => openPlayerSelector('FWD', 'bench')}
             />
           </div>
         </div>
@@ -273,14 +393,14 @@ export default function TeamBuilder() {
           </Button>
         </div>
 
-        {/* Coming Soon Notice */}
-        <div className="text-center">
-          <div className="inline-block bg-blue-100 dark:bg-blue-900 rounded-lg px-6 py-3">
-            <p className="text-sm text-blue-800 dark:text-blue-200">
-              🚧 Player selection interface coming soon! This is the team builder layout.
-            </p>
-          </div>
-        </div>
+        {/* Player Selection Modal */}
+        <PlayerSelectionModal
+          isOpen={modalState.isOpen}
+          onClose={closePlayerSelector}
+          position={modalState.position}
+          selectedPlayerIds={getAllSelectedPlayerIds()}
+          onSelectPlayer={handlePlayerSelect}
+        />
       </div>
     </div>
   )
@@ -318,7 +438,7 @@ function PlayerSlot({ position, player, isCaptain, isViceCaptain, label, onClick
               {player.name.split(' ').pop()}
             </div>
             <div className="text-[8px] text-gray-500">
-              {player.realTeam}
+              {player.realTeam?.shortName}
             </div>
             {isCaptain && <div className="text-yellow-600">©</div>}
             {isViceCaptain && <div className="text-blue-600">V</div>}

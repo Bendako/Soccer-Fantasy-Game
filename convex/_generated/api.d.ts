@@ -17,6 +17,7 @@ import type * as fantasyLeagues from "../fantasyLeagues.js";
 import type * as gameweeks from "../gameweeks.js";
 import type * as players from "../players.js";
 import type * as realTeams from "../realTeams.js";
+import type * as seedData from "../seedData.js";
 import type * as users from "../users.js";
 
 /**
@@ -32,6 +33,7 @@ declare const fullApi: ApiFromModules<{
   gameweeks: typeof gameweeks;
   players: typeof players;
   realTeams: typeof realTeams;
+  seedData: typeof seedData;
   users: typeof users;
 }>;
 export declare const api: FilterApi<

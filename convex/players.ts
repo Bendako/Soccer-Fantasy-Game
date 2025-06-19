@@ -27,20 +27,25 @@ export const createPlayer = mutation({
 
 // Get all players
 export const getAllPlayers = query({
+  args: {},
   handler: async (ctx) => {
     const players = await ctx.db.query("players").collect();
     
-    // Get team details for each player
+    // Get team info for each player
     const playersWithTeams = await Promise.all(
       players.map(async (player) => {
         const team = await ctx.db.get(player.realTeamId);
         return {
           ...player,
-          team,
+          realTeam: team ? {
+            name: team.name,
+            shortName: team.shortName,
+            colors: team.colors,
+          } : null,
         };
       })
     );
-
+    
     return playersWithTeams;
   },
 });
@@ -71,44 +76,64 @@ export const getPlayersByPosition = query({
       .query("players")
       .withIndex("by_position", (q) => q.eq("position", args.position))
       .collect();
-
-    // Get team details for each player
+    
+    // Get team info for each player
     const playersWithTeams = await Promise.all(
       players.map(async (player) => {
         const team = await ctx.db.get(player.realTeamId);
         return {
           ...player,
-          team,
+          realTeam: team ? {
+            name: team.name,
+            shortName: team.shortName,
+            colors: team.colors,
+          } : null,
         };
       })
     );
-
-    return playersWithTeams;
+    
+    return playersWithTeams.sort((a, b) => b.totalPoints - a.totalPoints);
   },
 });
 
 // Search players by name
 export const searchPlayers = query({
-  args: { searchTerm: v.string() },
+  args: { 
+    searchTerm: v.string(),
+    position: v.optional(v.string()),
+  },
   handler: async (ctx, args) => {
-    const allPlayers = await ctx.db.query("players").collect();
+    let players = await ctx.db.query("players").collect();
     
-    const filteredPlayers = allPlayers.filter(player => 
-      player.name.toLowerCase().includes(args.searchTerm.toLowerCase())
-    );
-
-    // Get team details for filtered players
+    // Filter by position if provided
+    if (args.position) {
+      players = players.filter(player => player.position === args.position);
+    }
+    
+    // Filter by search term
+    if (args.searchTerm) {
+      const searchLower = args.searchTerm.toLowerCase();
+      players = players.filter(player => 
+        player.name.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    // Get team info for each player
     const playersWithTeams = await Promise.all(
-      filteredPlayers.map(async (player) => {
+      players.map(async (player) => {
         const team = await ctx.db.get(player.realTeamId);
         return {
           ...player,
-          team,
+          realTeam: team ? {
+            name: team.name,
+            shortName: team.shortName,
+            colors: team.colors,
+          } : null,
         };
       })
     );
-
-    return playersWithTeams;
+    
+    return playersWithTeams.sort((a, b) => b.totalPoints - a.totalPoints);
   },
 });
 
@@ -135,10 +160,11 @@ export const updatePlayerStatus = mutation({
 export const updatePlayerStats = mutation({
   args: {
     playerId: v.id("players"),
-    totalGoals: v.optional(v.number()),
-    totalAssists: v.optional(v.number()),
-    totalPoints: v.optional(v.number()),
-    averagePoints: v.optional(v.number()),
+    goals: v.optional(v.number()),
+    assists: v.optional(v.number()),
+    points: v.optional(v.number()),
+    injured: v.optional(v.boolean()),
+    suspended: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const { playerId, ...updates } = args;
@@ -152,29 +178,59 @@ export const updatePlayerStats = mutation({
   },
 });
 
-// Get top performing players
-export const getTopPlayers = query({
-  args: { limit: v.optional(v.number()) },
+// Get player by ID with team info
+export const getPlayerById = query({
+  args: { playerId: v.id("players") },
   handler: async (ctx, args) => {
-    const limit = args.limit || 20;
+    const player = await ctx.db.get(args.playerId);
+    if (!player) return null;
     
-    const players = await ctx.db
+    const team = await ctx.db.get(player.realTeamId);
+    
+    return {
+      ...player,
+      realTeam: team ? {
+        name: team.name,
+        shortName: team.shortName,
+        colors: team.colors,
+      } : null,
+    };
+  },
+});
+
+// Get top performers
+export const getTopPerformers = query({
+  args: { 
+    position: v.optional(v.string()),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    let players = await ctx.db
       .query("players")
       .withIndex("by_total_points")
       .order("desc")
-      .take(limit);
-
-    // Get team details for each player
+      .take(args.limit || 10);
+    
+    // Filter by position if provided
+    if (args.position) {
+      players = players.filter(player => player.position === args.position);
+    }
+    
+    // Get team info for each player
     const playersWithTeams = await Promise.all(
       players.map(async (player) => {
         const team = await ctx.db.get(player.realTeamId);
         return {
           ...player,
-          team,
+          realTeam: team ? {
+            name: team.name,
+            shortName: team.shortName,
+            colors: team.colors,
+          } : null,
         };
       })
     );
-
+    
     return playersWithTeams;
   },
 }); 
