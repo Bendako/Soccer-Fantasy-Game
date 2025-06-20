@@ -250,4 +250,41 @@ export const getTopPerformers = query({
     
     return playersWithTeams;
   },
+});
+
+// Get players by league
+export const getPlayersByLeague = query({
+  args: { league: v.string() },
+  handler: async (ctx, args) => {
+    // First get all teams in this league
+    const teams = await ctx.db
+      .query("realTeams")
+      .withIndex("by_league", (q) => q.eq("league", args.league))
+      .collect();
+    
+    const teamIds = teams.map(team => team._id);
+    
+    // Get all players from these teams
+    const players = await ctx.db.query("players").collect();
+    const leaguePlayers = players.filter(player => 
+      teamIds.includes(player.realTeamId)
+    );
+    
+    // Get team info for each player
+    const playersWithTeams = await Promise.all(
+      leaguePlayers.map(async (player) => {
+        const team = await ctx.db.get(player.realTeamId);
+        return {
+          ...player,
+          realTeam: team ? {
+            name: team.name,
+            shortName: team.shortName,
+            colors: team.colors,
+          } : null,
+        };
+      })
+    );
+    
+    return playersWithTeams.sort((a, b) => b.totalPoints - a.totalPoints);
+  },
 }); 

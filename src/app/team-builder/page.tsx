@@ -9,9 +9,29 @@ import { api } from '../../../convex/_generated/api'
 import { useState, useEffect } from 'react'
 import type { Id } from "../../../convex/_generated/dataModel"
 
+const TOURNAMENTS = {
+  premier_league: {
+    name: 'Premier League',
+    flag: '🇬🇧',
+    color: 'from-purple-500 to-blue-600'
+  },
+  la_liga: {
+    name: 'La Liga',
+    flag: '🇪🇸',
+    color: 'from-red-500 to-orange-600'
+  },
+  champions_league: {
+    name: 'Champions League',
+    flag: '🏆',
+    color: 'from-blue-600 to-indigo-700'
+  }
+} as const
+
+type TournamentKey = keyof typeof TOURNAMENTS
+
 export default function TeamBuilder() {
   const { user } = useUser()
-  const [selectedLeague] = useState<string>('premier_league')
+  const [selectedLeague, setSelectedLeague] = useState<TournamentKey>('premier_league')
   const [userConvexId, setUserConvexId] = useState<Id<"users"> | null>(null)
 
   // Fetch or create user in Convex
@@ -29,8 +49,8 @@ export default function TeamBuilder() {
     userConvexId ? { userId: userConvexId } : "skip"
   )
 
-  // Fetch players data
-  const players = useQuery(api.players.getAllPlayers)
+  // Fetch players data for the selected league
+  const players = useQuery(api.players.getPlayersByLeague, { league: selectedLeague })
 
   // Get user's existing team for current gameweek (if any)
   const currentLeagueId = userLeagues?.[0]?._id
@@ -188,8 +208,24 @@ export default function TeamBuilder() {
             <div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">Team Builder</h1>
               <p className="text-emerald-100 text-sm sm:text-base">
-                Build your team for Gameweek {currentGameweek.number} ({selectedLeague.replace('_', ' ').toUpperCase()})
+                Build your team for Gameweek {currentGameweek.number} ({TOURNAMENTS[selectedLeague].name})
               </p>
+            </div>
+            
+            {/* Tournament Selector */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+              <label className="block text-white text-sm font-medium mb-2">Select Tournament:</label>
+              <select 
+                value={selectedLeague}
+                onChange={(e) => setSelectedLeague(e.target.value as TournamentKey)}
+                className="w-full bg-white/20 border border-white/30 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/50"
+              >
+                {Object.entries(TOURNAMENTS).map(([key, tournament]) => (
+                  <option key={key} value={key} className="bg-gray-800 text-white">
+                    {tournament.flag} {tournament.name}
+                  </option>
+                ))}
+              </select>
             </div>
             
             {/* Mobile-friendly navigation buttons */}

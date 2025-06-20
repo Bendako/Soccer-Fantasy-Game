@@ -250,4 +250,6 @@ export default defineSchema({
     .index("by_league_gameweek", ["fantasyLeagueId", "gameweekId"])
     .index("by_league_rank", ["fantasyLeagueId", "rank"])
     .index("by_user", ["userId"]),
+
+
 });

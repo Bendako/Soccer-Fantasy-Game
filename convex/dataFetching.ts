@@ -417,4 +417,57 @@ export const updatePlayerImageUrl = internalMutation({
       updatedAt: Date.now(),
     });
   },
-}); 
+});
+
+// Clean up duplicate teams
+export const cleanupDuplicateTeams = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const teams = await ctx.db.query("realTeams").collect();
+    const teamGroups: Record<string, typeof teams> = {};
+    
+    // Group teams by name and league
+    teams.forEach(team => {
+      const key = `${team.name}_${team.league}`;
+      if (!teamGroups[key]) {
+        teamGroups[key] = [];
+      }
+      teamGroups[key].push(team);
+    });
+    
+    let deletedCount = 0;
+    
+    // For each group with duplicates, keep the most recent one
+    for (const teamGroup of Object.values(teamGroups)) {
+      if (teamGroup.length > 1) {
+        // Sort by creation time, keep the most recent
+        teamGroup.sort((a, b) => b.createdAt - a.createdAt);
+        const toKeep = teamGroup[0];
+        const toDelete = teamGroup.slice(1);
+        
+        // Delete older duplicates
+        for (const team of toDelete) {
+          await ctx.db.delete(team._id);
+          deletedCount++;
+        }
+        
+        console.log(`Kept ${toKeep.name} (${toKeep._id}), deleted ${toDelete.length} duplicates`);
+      }
+    }
+    
+    return { deletedCount, remainingTeams: teams.length - deletedCount };
+  },
+});
+
+// Get teams by league
+export const getTeamsByLeague = internalQuery({
+  args: { league: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("realTeams")
+      .withIndex("by_league", (q) => q.eq("league", args.league))
+      .collect();
+  },
+});
+
+ 
