@@ -165,6 +165,7 @@ export const updatePlayerStats = mutation({
     points: v.optional(v.number()),
     injured: v.optional(v.boolean()),
     suspended: v.optional(v.boolean()),
+    imageUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { playerId, ...updates } = args;
@@ -175,6 +176,22 @@ export const updatePlayerStats = mutation({
     });
 
     return playerId;
+  },
+});
+
+// Update player image URL
+export const updatePlayerImage = mutation({
+  args: {
+    playerId: v.id("players"),
+    imageUrl: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.playerId, {
+      imageUrl: args.imageUrl,
+      updatedAt: Date.now(),
+    });
+
+    return args.playerId;
   },
 });
 

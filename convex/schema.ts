@@ -35,7 +35,8 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_league", ["league"])
-    .index("by_name", ["name"]),
+    .index("by_name", ["name"])
+    .index("by_external_id", ["externalId"]),
   
   // Real soccer players
   players: defineTable({
@@ -52,6 +53,7 @@ export default defineSchema({
     totalPoints: v.number(),
     averagePoints: v.number(),
     // Additional optional fields that might exist in database
+    externalId: v.optional(v.string()),
     minutesPlayed: v.optional(v.number()),
     price: v.optional(v.number()),
     form: v.optional(v.array(v.number())),
@@ -61,7 +63,8 @@ export default defineSchema({
     .index("by_team", ["realTeamId"])
     .index("by_position", ["position"])
     .index("by_name", ["name"])
-    .index("by_total_points", ["totalPoints"]),
+    .index("by_total_points", ["totalPoints"])
+    .index("by_external_id", ["externalId"]),
   
   // Fantasy leagues where users compete
   fantasyLeagues: defineTable({

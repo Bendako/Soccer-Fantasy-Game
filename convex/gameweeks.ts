@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, MutationCtx } from "./_generated/server";
 
 // Create a gameweek
 export const createGameweek = mutation({
@@ -28,7 +28,7 @@ export const getCurrentGameweek = query({
       .query("gameweeks")
       .withIndex("by_active", (q) => q.eq("isActive", true))
       .filter((q) => q.eq(q.field("league"), args.league))
-      .unique();
+      .first();
   },
 });
 
@@ -152,10 +152,57 @@ export const getGameweekWithStats = query({
   },
 });
 
+// Helper function to clean up duplicate active gameweeks
+async function cleanupDuplicateActiveGameweeksHelper(ctx: MutationCtx, league: string) {
+  // Get all active gameweeks for this league
+  const activeGameweeks = await ctx.db
+    .query("gameweeks")
+    .withIndex("by_active", (q) => q.eq("isActive", true))
+    .filter((q) => q.eq(q.field("league"), league))
+    .collect();
+  
+  if (activeGameweeks.length <= 1) {
+    return { message: "No duplicate active gameweeks found", cleaned: 0 };
+  }
+  
+  // Keep the first one (by creation time) and deactivate the rest
+  const sortedGameweeks = activeGameweeks.sort((a, b) => a.createdAt - b.createdAt);
+  const gameweekToKeep = sortedGameweeks[0];
+  const gameweeksToDeactivate = sortedGameweeks.slice(1);
+  
+  // Deactivate duplicate gameweeks
+  await Promise.all(
+    gameweeksToDeactivate.map(async (gw) => {
+      await ctx.db.patch(gw._id, {
+        isActive: false,
+        status: "upcoming",
+        updatedAt: Date.now(),
+      });
+    })
+  );
+  
+  return { 
+    message: `Cleaned up ${gameweeksToDeactivate.length} duplicate active gameweeks`,
+    cleaned: gameweeksToDeactivate.length,
+    activeGameweek: gameweekToKeep
+  };
+}
+
+// Clean up duplicate active gameweeks (data consistency fix)
+export const cleanupDuplicateActiveGameweeks = mutation({
+  args: { league: v.string() },
+  handler: async (ctx, args) => {
+    return await cleanupDuplicateActiveGameweeksHelper(ctx, args.league);
+  },
+});
+
 // Activate the first gameweek if none is active
 export const activateFirstGameweek = mutation({
   args: { league: v.string() },
   handler: async (ctx, args) => {
+    // First, clean up any duplicate active gameweeks
+    await cleanupDuplicateActiveGameweeksHelper(ctx, args.league);
+    
     // Check if there's already an active gameweek
     const activeGameweek = await ctx.db
       .query("gameweeks")
