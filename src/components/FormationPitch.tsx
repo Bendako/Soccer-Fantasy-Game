@@ -164,6 +164,8 @@ export default function FormationPitch({
   });
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<'points' | 'name'>('points');
 
   // Convex hooks
   const { user } = useUser();
@@ -297,6 +299,7 @@ export default function FormationPitch({
 
   const handleSlotClick = (slotId: string, position: string) => {
     if (isDeadlinePassed) return;
+    setSearchTerm(''); // Clear search when opening modal
     setShowPlayerModal({ show: true, slotId, position });
   };
 
@@ -374,7 +377,7 @@ export default function FormationPitch({
     
     // Filter players by position and exclude already assigned players
     // BUT allow the current player in the slot to be shown (for re-selection/confirmation)
-    return selectedPlayers.filter(player => {
+    const availablePlayers = selectedPlayers.filter(player => {
       if (player.position !== position) return false;
       
       // If this player is assigned but it's the current player in this slot, allow it
@@ -384,6 +387,26 @@ export default function FormationPitch({
       
       // Otherwise, exclude already assigned players
       return !assignedPlayerIds.includes(player._id);
+    });
+
+    // Apply search filter
+    const filteredPlayers = availablePlayers.filter(player => {
+      if (!searchTerm) return true;
+      const lowerSearchTerm = searchTerm.toLowerCase();
+      return (
+        player.name.toLowerCase().includes(lowerSearchTerm) ||
+        player.realTeam?.name.toLowerCase().includes(lowerSearchTerm) ||
+        player.realTeam?.shortName.toLowerCase().includes(lowerSearchTerm)
+      );
+    });
+
+    // Apply sorting
+    return filteredPlayers.sort((a, b) => {
+      if (sortBy === 'points') {
+        return b.totalPoints - a.totalPoints;
+      } else {
+        return a.name.localeCompare(b.name);
+      }
     });
   };
 
@@ -635,6 +658,33 @@ export default function FormationPitch({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
+            </div>
+
+            {/* Search and Sort Controls */}
+            <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-3">
+              {/* Search Bar */}
+              <div className="flex-1 relative">
+                <svg className="w-5 h-5 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search players by name, team..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-400 bg-white shadow-sm text-slate-700 placeholder-slate-400 text-sm"
+                />
+              </div>
+              
+              {/* Sort Dropdown */}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as 'points' | 'name')}
+                className="px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-400 bg-white shadow-sm text-slate-700 text-sm min-w-[140px]"
+              >
+                <option value="points">Sort by Points</option>
+                <option value="name">Sort by Name</option>
+              </select>
             </div>
             <div className="grid grid-cols-1 gap-3">
               {getAvailablePlayersForPosition(showPlayerModal.position).map(player => (

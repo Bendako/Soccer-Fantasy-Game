@@ -227,18 +227,18 @@ export default function TeamBuilder() {
                 ))}
               </select>
             </div>
+          </div>
             
             {/* Mobile-friendly navigation buttons */}
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-              <Link href="/">
-                <Button 
-                  variant="outline" 
-                  className="w-full sm:w-auto bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white min-h-[44px] touch-manipulation"
-                >
-                  ← Home
-                </Button>
-              </Link>
-            </div>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-4">
+            <Link href="/">
+              <Button 
+                variant="outline" 
+                className="w-full sm:w-auto bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white min-h-[44px] touch-manipulation"
+              >
+                ← Home
+              </Button>
+            </Link>
           </div>
           
           {/* Gameweek Info Panel */}
