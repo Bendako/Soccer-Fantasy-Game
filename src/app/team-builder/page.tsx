@@ -7,6 +7,7 @@ import Link from 'next/link'
 import FormationPitch, { Player } from '@/components/FormationPitch'
 import { api } from '../../../convex/_generated/api'
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import type { Id } from "../../../convex/_generated/dataModel"
 
 const TOURNAMENTS = {
@@ -31,7 +32,18 @@ type TournamentKey = keyof typeof TOURNAMENTS
 
 export default function TeamBuilder() {
   const { user } = useUser()
-  const [selectedLeague, setSelectedLeague] = useState<TournamentKey>('premier_league')
+  const searchParams = useSearchParams()
+  
+  // Get the league from URL params, default to premier_league if not provided or invalid
+  const getDefaultLeague = (): TournamentKey => {
+    const leagueParam = searchParams?.get('league')
+    if (leagueParam && leagueParam in TOURNAMENTS) {
+      return leagueParam as TournamentKey
+    }
+    return 'premier_league'
+  }
+  
+  const [selectedLeague, setSelectedLeague] = useState<TournamentKey>(getDefaultLeague())
   const [userConvexId, setUserConvexId] = useState<Id<"users"> | null>(null)
 
   // Fetch or create user in Convex
