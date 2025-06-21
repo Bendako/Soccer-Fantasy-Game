@@ -1,75 +1,90 @@
 'use client';
 
+import React from 'react';
+
 interface StatusBannerProps {
-  hasClerk?: boolean;
-  hasConvex?: boolean;
-  className?: string;
+  gameweekNumber: number;
+  isDeadlinePassed: boolean;
+  timeRemaining: number;
+  existingTeam?: boolean;
+  playerCount?: number;
 }
 
-export default function StatusBanner({ hasClerk = false, hasConvex = false, className = '' }: StatusBannerProps) {
-  const missingServices: string[] = [];
-  if (!hasClerk) missingServices.push('Authentication (Clerk)');
-  if (!hasConvex) missingServices.push('Database (Convex)');
-
-  if (missingServices.length === 0) {
-    return (
-      <div className={`bg-green-50 border border-green-200 rounded-lg p-4 mb-6 ${className}`}>
-        <div className="flex items-center gap-3">
-          <div className="h-5 w-5 text-green-600">✅</div>
-          <div>
-            <h3 className="text-sm font-medium text-green-800">All Services Configured</h3>
-            <p className="text-sm text-green-700">Your application is fully set up with authentication and database.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+export default function StatusBanner({ 
+  gameweekNumber, 
+  isDeadlinePassed, 
+  timeRemaining, 
+  existingTeam,
+  playerCount 
+}: StatusBannerProps) {
+  const formatTimeRemaining = (ms: number) => {
+    const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((ms % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (days > 0) return `${days}d ${hours}h`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
+  };
 
   return (
-    <div className={`bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 ${className}`}>
-      <div className="flex items-start gap-3">
-        <div className="h-5 w-5 text-amber-600 mt-0.5">⚠️</div>
-        <div className="flex-1">
-          <h3 className="text-sm font-medium text-amber-800">Configuration Required</h3>
-          <p className="text-sm text-amber-700 mb-3">
-            The following services need to be configured to unlock full functionality:
+    <div className="space-y-3 xs:space-y-4">
+      {/* Existing Team Status */}
+      {existingTeam && (
+        <div className="bg-blue-500/20 border border-blue-400/30 rounded-lg p-3 xs:p-4">
+          <div className="flex items-center gap-2 text-blue-100">
+            <svg className="w-4 h-4 xs:w-5 xs:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span className="font-medium text-xs xs:text-sm">
+              Team already submitted for this gameweek
+            </span>
+          </div>
+          <p className="text-blue-200 text-xs xs:text-sm mt-1">
+            You can still make changes until the deadline.
           </p>
-          <div className="space-y-2">
-            {!hasClerk && (
-              <div className="flex items-center gap-2 text-sm">
-                <div className="h-4 w-4 text-amber-600">🔐</div>
-                <span className="text-amber-800">Authentication (Clerk) - User sign-in/sign-up</span>
-              </div>
-            )}
-            {!hasConvex && (
-              <div className="flex items-center gap-2 text-sm">
-                <div className="h-4 w-4 text-amber-600">🗄️</div>
-                <span className="text-amber-800">Database (Convex) - Real-time data storage</span>
-              </div>
-            )}
+        </div>
+      )}
+
+      {/* Deadline Status */}
+      <div className={`rounded-lg p-3 xs:p-4 border ${
+        isDeadlinePassed 
+          ? 'bg-red-500/20 border-red-400/30' 
+          : timeRemaining < 24 * 60 * 60 * 1000 
+            ? 'bg-orange-500/20 border-orange-400/30'
+            : 'bg-green-500/20 border-green-400/30'
+      }`}>
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <div className={`flex items-center gap-2 ${
+              isDeadlinePassed ? 'text-red-100' : timeRemaining < 24 * 60 * 60 * 1000 ? 'text-orange-100' : 'text-green-100'
+            }`}>
+              <svg className="w-4 h-4 xs:w-5 xs:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {isDeadlinePassed ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                )}
+              </svg>
+              <span className="font-medium text-xs xs:text-sm">
+                {isDeadlinePassed ? 'Teams Locked' : `${formatTimeRemaining(timeRemaining)} remaining`}
+              </span>
+            </div>
+            <p className={`text-xs mt-1 ${
+              isDeadlinePassed ? 'text-red-200' : timeRemaining < 24 * 60 * 60 * 1000 ? 'text-orange-200' : 'text-green-200'
+            }`}>
+              Gameweek {gameweekNumber} deadline
+            </p>
           </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {!hasClerk && (
-              <a
-                href="https://clerk.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors"
-              >
-                Set up Clerk
-              </a>
-            )}
-            {!hasConvex && (
-              <a
-                href="https://convex.dev"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors"
-              >
-                Set up Convex
-              </a>
-            )}
-          </div>
+          
+          {/* Player Count */}
+          {playerCount && playerCount > 0 && (
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg px-2 xs:px-3 py-1.5 xs:py-2">
+              <span className="text-emerald-100 text-xs xs:text-sm font-medium">
+                {playerCount} players
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -421,38 +421,47 @@ export default function FormationPitch({
         style={style}
         onClick={() => handleSlotClick(slotId, position)}
         className={`
-          absolute w-14 h-14 sm:w-16 sm:h-16 lg:w-18 lg:h-18 rounded-full border-2 flex items-center justify-center transition-all transform -translate-x-1/2 -translate-y-1/2 touch-manipulation
-          ${isDeadlinePassed ? 'cursor-not-allowed opacity-75' : 'cursor-pointer active:scale-95'}
+          absolute 
+          w-10 h-10 
+          xs:w-12 xs:h-12 
+          sm:w-14 sm:h-14 
+          md:w-16 md:h-16 
+          lg:w-18 lg:h-18 
+          xl:w-20 xl:h-20
+          rounded-full border-2 flex items-center justify-center 
+          transition-all duration-200 transform -translate-x-1/2 -translate-y-1/2 
+          touch-manipulation cursor-pointer
+          ${isDeadlinePassed ? 'cursor-not-allowed opacity-75' : 'active:scale-95'}
           ${player 
-            ? `${positionColors[position]} text-white shadow-lg ${!isDeadlinePassed ? 'hover:scale-105' : ''}` 
-            : `border-white/60 border-dashed bg-white/20 ${!isDeadlinePassed ? 'hover:bg-white/30 active:bg-white/40' : ''}`
+            ? `${positionColors[position]} text-white shadow-lg ${!isDeadlinePassed ? 'hover:scale-105 hover:shadow-xl' : ''}` 
+            : `border-white/60 border-dashed bg-white/20 ${!isDeadlinePassed ? 'hover:bg-white/30 active:bg-white/40 hover:border-white/80' : ''}`
           }
-          ${isCaptain ? 'ring-2 sm:ring-4 ring-yellow-400' : ''}
-          ${isViceCaptain ? 'ring-2 sm:ring-4 ring-gray-400' : ''}
+          ${isCaptain ? 'ring-2 xs:ring-3 sm:ring-4 ring-yellow-400 ring-offset-1' : ''}
+          ${isViceCaptain ? 'ring-2 xs:ring-3 sm:ring-4 ring-gray-400 ring-offset-1' : ''}
         `}
       >
         {player ? (
           <div className="relative w-full h-full flex items-center justify-center">
             {/* Captain/Vice Captain Badge */}
             {isCaptain && (
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 text-black font-bold rounded-full flex items-center justify-center text-xs">
+              <div className="absolute -top-0.5 -right-0.5 xs:-top-1 xs:-right-1 w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5 bg-yellow-400 text-black font-bold rounded-full flex items-center justify-center text-xxs xs:text-xs shadow-md">
                 C
               </div>
             )}
             {isViceCaptain && (
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-gray-400 text-white font-bold rounded-full flex items-center justify-center text-xs">
+              <div className="absolute -top-0.5 -right-0.5 xs:-top-1 xs:-right-1 w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5 bg-gray-400 text-white font-bold rounded-full flex items-center justify-center text-xxs xs:text-xs shadow-md">
                 V
               </div>
             )}
             
             {/* Player Jersey Number or Initials */}
-            <span className="text-xs font-bold">
-              {player.jerseyNumber || player.name.split(' ').map(n => n[0]).join('')}
+            <span className="text-xxs xs:text-xs sm:text-sm lg:text-base font-bold text-center leading-tight">
+              {player.jerseyNumber || player.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
             </span>
           </div>
         ) : (
           <div className="text-center">
-            <div className="text-xs font-medium text-white/80">
+            <div className="text-xxs xs:text-xs sm:text-sm font-medium text-white/80">
               {positionLabels[position]}
             </div>
           </div>
@@ -508,57 +517,76 @@ export default function FormationPitch({
       )}
 
       {/* Formation Selector */}
-      <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <label className="font-semibold text-slate-700 text-sm sm:text-base">Formation:</label>
-            <select
-              value={selectedFormation}
-              onChange={(e) => setSelectedFormation(e.target.value)}
-              disabled={isDeadlinePassed}
-              className="px-4 py-3 sm:py-2.5 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-400 text-sm sm:text-base bg-white shadow-sm font-medium text-slate-700 min-h-[44px] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {Object.keys(formations).map(formation => (
-                <option key={formation} value={formation}>
-                  {formation}
-                </option>
-              ))}
-            </select>
-          </div>
-          {!isDeadlinePassed && (
-            <div className="flex items-center gap-2">
+      <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-3 xs:p-4 sm:p-6">
+        <div className="flex flex-col gap-3 sm:gap-4">
+          {/* Top row - Formation selector and clear button */}
+          <div className="flex flex-col xs:flex-row xs:items-center gap-3 xs:gap-4">
+            <div className="flex items-center gap-2 xs:gap-3 min-w-0 flex-1">
+              <label className="font-semibold text-slate-700 text-xs xs:text-sm sm:text-base whitespace-nowrap">Formation:</label>
+              <select
+                value={selectedFormation}
+                onChange={(e) => setSelectedFormation(e.target.value)}
+                disabled={isDeadlinePassed}
+                className="flex-1 px-3 xs:px-4 py-2.5 xs:py-3 sm:py-2.5 border border-emerald-200 rounded-lg xs:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-400 text-xs xs:text-sm sm:text-base bg-white shadow-sm font-medium text-slate-700 min-h-touch touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {Object.keys(formations).map(formation => (
+                  <option key={formation} value={formation}>
+                    {formation}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {!isDeadlinePassed && (
               <button
                 onClick={handleClearTeam}
-                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors text-sm"
+                className="px-3 xs:px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors text-xs xs:text-sm min-h-touch touch-manipulation active:bg-red-700 xs:min-w-[100px]"
               >
                 Clear Team
               </button>
+            )}
+          </div>
+          
+          {/* Bottom row - Team info */}
+          <div className="bg-slate-50/80 rounded-lg p-2 xs:p-3 sm:p-4">
+            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-2 xs:gap-3 text-xs xs:text-sm">
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-slate-600">Formation:</span>
+                <span className="text-emerald-600 font-semibold">{selectedFormation}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-slate-600">Captain:</span>
+                <span className="text-amber-600 font-semibold truncate">
+                  {captain ? teamFormation[Object.keys(teamFormation).find(key => teamFormation[key]?._id === captain) || '']?.name || 'None' : 'None'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 xs:col-span-2 lg:col-span-1">
+                <span className="font-medium text-slate-600">Vice Captain:</span>
+                <span className="text-slate-600 font-semibold truncate">
+                  {viceCaptain ? teamFormation[Object.keys(teamFormation).find(key => teamFormation[key]?._id === viceCaptain) || '']?.name || 'None' : 'None'}
+                </span>
+              </div>
             </div>
-          )}
-          <div className="text-xs sm:text-sm text-slate-600 flex flex-col sm:flex-row gap-1 sm:gap-2 bg-slate-50 rounded-lg p-2 sm:p-3">
-            <span className="font-medium">Formation: <span className="text-emerald-600">{selectedFormation}</span></span>
-            <span className="hidden sm:inline text-slate-400">•</span>
-            <span className="font-medium">Captain: <span className="text-amber-600">{captain ? teamFormation[Object.keys(teamFormation).find(key => teamFormation[key]?._id === captain) || '']?.name || 'None' : 'None'}</span></span>
-            <span className="hidden sm:inline text-slate-400">•</span>
-            <span className="font-medium">Vice: <span className="text-slate-600">{viceCaptain ? teamFormation[Object.keys(teamFormation).find(key => teamFormation[key]?._id === viceCaptain) || '']?.name || 'None' : 'None'}</span></span>
           </div>
         </div>
       </div>
 
       {/* Soccer Pitch */}
       <div
-        className="relative bg-gradient-to-b from-green-400 to-green-500 rounded-lg shadow-lg overflow-hidden h-[450px] sm:h-[550px] lg:h-[650px]"
+        className="relative bg-gradient-to-b from-green-400 to-green-500 rounded-lg shadow-lg overflow-hidden 
+                   h-[350px] xs:h-[400px] sm:h-[500px] md:h-[580px] lg:h-[650px] xl:h-[720px]
+                   mx-auto max-w-sm xs:max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl"
         style={{ 
           backgroundImage: `
             linear-gradient(90deg, rgba(255,255,255,0.1) 50%, transparent 50%),
             linear-gradient(rgba(255,255,255,0.1) 50%, transparent 50%)
           `,
-          backgroundSize: '20px 20px'
+          backgroundSize: '15px 15px'
         }}
       >
         {/* Center Circle */}
         <div 
-          className="absolute border-2 border-white/50 rounded-full w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28"
+          className="absolute border-2 border-white/50 rounded-full 
+                     w-14 h-14 xs:w-16 xs:h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 xl:w-32 xl:h-32"
           style={{
             top: '50%',
             left: '50%',
@@ -568,7 +596,7 @@ export default function FormationPitch({
         
         {/* Center Dot */}
         <div 
-          className="absolute bg-white/70 rounded-full w-2 h-2"
+          className="absolute bg-white/70 rounded-full w-1.5 h-1.5 xs:w-2 xs:h-2 sm:w-2.5 sm:h-2.5"
           style={{
             top: '50%',
             left: '50%',
@@ -578,17 +606,39 @@ export default function FormationPitch({
 
         {/* Goal Areas */}
         <div 
-          className="absolute border-2 border-white/50 w-20 h-8 sm:w-24 sm:h-10 lg:w-28 lg:h-12"
+          className="absolute border-2 border-white/50 
+                     w-14 h-6 xs:w-16 xs:h-7 sm:w-20 sm:h-8 md:w-24 md:h-10 lg:w-28 lg:h-12 xl:w-32 xl:h-14"
           style={{
-            top: '10px',
+            top: '8px',
             left: '50%',
             transform: 'translateX(-50%)'
           }}
         />
         <div 
-          className="absolute border-2 border-white/50 w-20 h-8 sm:w-24 sm:h-10 lg:w-28 lg:h-12"
+          className="absolute border-2 border-white/50 
+                     w-14 h-6 xs:w-16 xs:h-7 sm:w-20 sm:h-8 md:w-24 md:h-10 lg:w-28 lg:h-12 xl:w-32 xl:h-14"
           style={{
-            bottom: '10px',
+            bottom: '8px',
+            left: '50%',
+            transform: 'translateX(-50%)'
+          }}
+        />
+
+        {/* Penalty Areas */}
+        <div 
+          className="absolute border-2 border-white/30 
+                     w-24 h-12 xs:w-28 xs:h-14 sm:w-32 sm:h-16 md:w-36 md:h-18 lg:w-40 lg:h-20 xl:w-44 xl:h-22"
+          style={{
+            top: '5px',
+            left: '50%',
+            transform: 'translateX(-50%)'
+          }}
+        />
+        <div 
+          className="absolute border-2 border-white/30 
+                     w-24 h-12 xs:w-28 xs:h-14 sm:w-32 sm:h-16 md:w-36 md:h-18 lg:w-40 lg:h-20 xl:w-44 xl:h-22"
+          style={{
+            bottom: '5px',
             left: '50%',
             transform: 'translateX(-50%)'
           }}
@@ -643,78 +693,89 @@ export default function FormationPitch({
 
       {/* Player Selection Modal */}
       {showPlayerModal.show && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-6 w-full max-w-3xl max-h-[85vh] overflow-y-auto border border-emerald-100">
-            <div className="flex justify-between items-center mb-4 sm:mb-6">
-              <div>
-                <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-800">Select {showPlayerModal.position}</h3>
-                <p className="text-sm text-slate-600 mt-1">Choose a player for this position</p>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 xs:p-3 sm:p-4 safe-area-inset">
+          <div className="bg-white rounded-xl xs:rounded-2xl shadow-2xl w-full max-w-xs xs:max-w-sm sm:max-w-2xl md:max-w-3xl lg:max-w-4xl max-h-[95vh] xs:max-h-[90vh] sm:max-h-[85vh] flex flex-col border border-emerald-100">
+            {/* Header - Fixed */}
+            <div className="flex justify-between items-center p-3 xs:p-4 sm:p-6 border-b border-slate-100">
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base xs:text-lg sm:text-xl lg:text-2xl font-bold text-slate-800 truncate">
+                  Select {showPlayerModal.position}
+                </h3>
+                <p className="text-xs xs:text-sm text-slate-600 mt-1">Choose a player for this position</p>
               </div>
               <button
                 onClick={() => setShowPlayerModal({ show: false, slotId: '', position: '' })}
-                className="text-slate-400 hover:text-slate-600 p-3 hover:bg-slate-100 rounded-full transition-colors touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
+                className="text-slate-400 hover:text-slate-600 p-2 xs:p-3 hover:bg-slate-100 rounded-full transition-colors touch-manipulation min-h-touch min-w-touch flex items-center justify-center ml-3"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 xs:w-6 xs:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
-            {/* Search and Sort Controls */}
-            <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-3">
-              {/* Search Bar */}
-              <div className="flex-1 relative">
-                <svg className="w-5 h-5 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Search players by name, team..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-400 bg-white shadow-sm text-slate-700 placeholder-slate-400 text-sm"
-                />
-              </div>
-              
-              {/* Sort Dropdown */}
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as 'points' | 'name')}
-                className="px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-400 bg-white shadow-sm text-slate-700 text-sm min-w-[140px]"
-              >
-                <option value="points">Sort by Points</option>
-                <option value="name">Sort by Name</option>
-              </select>
-            </div>
-            <div className="grid grid-cols-1 gap-3">
-              {getAvailablePlayersForPosition(showPlayerModal.position).map(player => (
-                <div
-                  key={player._id}
-                  onClick={() => handlePlayerAssign(player)}
-                  className="group p-4 border border-slate-200 rounded-xl cursor-pointer hover:border-emerald-300 hover:bg-emerald-50 transition-all duration-200 hover:shadow-md active:bg-emerald-100 touch-manipulation min-h-[72px] flex items-center"
+            {/* Search and Sort Controls - Fixed */}
+            <div className="p-3 xs:p-4 sm:p-6 border-b border-slate-100 bg-slate-50/50">
+              <div className="flex flex-col xs:flex-row gap-2 xs:gap-3">
+                {/* Search Bar */}
+                <div className="flex-1 relative">
+                  <svg className="w-4 h-4 xs:w-5 xs:h-5 text-slate-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder="Search players..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-9 xs:pl-10 pr-3 xs:pr-4 py-2 xs:py-2.5 border border-slate-200 rounded-lg xs:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-400 bg-white shadow-sm text-slate-700 placeholder-slate-400 text-xs xs:text-sm min-h-touch"
+                  />
+                </div>
+                
+                {/* Sort Dropdown */}
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as 'points' | 'name')}
+                  className="px-3 xs:px-4 py-2 xs:py-2.5 border border-slate-200 rounded-lg xs:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-400 bg-white shadow-sm text-slate-700 text-xs xs:text-sm min-w-[120px] xs:min-w-[140px] min-h-touch"
                 >
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-full ${positionColors[player.position]} text-white text-sm font-bold flex items-center justify-center shadow-lg`}>
-                        {player.position}
-                      </div>
-                      <div>
-                        <div className="font-semibold text-slate-800 text-base group-hover:text-emerald-700 transition-colors">{player.name}</div>
-                        <div className="text-sm text-slate-600 flex items-center gap-2">
-                          <span className="font-medium">{player.realTeam?.shortName}</span>
-                          <span className="text-slate-400">•</span>
-                          <span className="text-emerald-600 font-semibold">{player.totalPoints} pts</span>
+                  <option value="points">By Points</option>
+                  <option value="name">By Name</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Player List - Scrollable */}
+            <div className="flex-1 overflow-y-auto scrollbar-hide p-3 xs:p-4 sm:p-6">
+              <div className="grid grid-cols-1 gap-2 xs:gap-3">
+                {getAvailablePlayersForPosition(showPlayerModal.position).map(player => (
+                  <div
+                    key={player._id}
+                    onClick={() => handlePlayerAssign(player)}
+                    className="group p-3 xs:p-4 border border-slate-200 rounded-lg xs:rounded-xl cursor-pointer hover:border-emerald-300 hover:bg-emerald-50 transition-all duration-200 hover:shadow-md active:bg-emerald-100 touch-manipulation min-h-[60px] xs:min-h-[72px] flex items-center"
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-3 xs:gap-4 min-w-0 flex-1">
+                        <div className={`w-10 h-10 xs:w-12 xs:h-12 rounded-full ${positionColors[player.position]} text-white text-xs xs:text-sm font-bold flex items-center justify-center shadow-lg flex-shrink-0`}>
+                          {player.position}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="font-semibold text-slate-800 text-sm xs:text-base group-hover:text-emerald-700 transition-colors truncate">
+                            {player.name}
+                          </div>
+                          <div className="text-xs xs:text-sm text-slate-600 flex items-center gap-1 xs:gap-2">
+                            <span className="font-medium truncate">{player.realTeam?.shortName}</span>
+                            <span className="text-slate-400 hidden xs:inline">•</span>
+                            <span className="text-emerald-600 font-semibold">{player.totalPoints} pts</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                      <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-2">
+                        <svg className="w-4 h-4 xs:w-5 xs:h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
