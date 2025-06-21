@@ -20,6 +20,8 @@ import type * as gameweeks from "../gameweeks.js";
 import type * as imageUpdateUtility from "../imageUpdateUtility.js";
 import type * as playerImageService from "../playerImageService.js";
 import type * as players from "../players.js";
+import type * as realDataFetcher from "../realDataFetcher.js";
+import type * as realPlayerDataFetcher from "../realPlayerDataFetcher.js";
 import type * as realTeams from "../realTeams.js";
 import type * as seedData from "../seedData.js";
 import type * as setupFootballData from "../setupFootballData.js";
@@ -42,6 +44,8 @@ declare const fullApi: ApiFromModules<{
   imageUpdateUtility: typeof imageUpdateUtility;
   playerImageService: typeof playerImageService;
   players: typeof players;
+  realDataFetcher: typeof realDataFetcher;
+  realPlayerDataFetcher: typeof realPlayerDataFetcher;
   realTeams: typeof realTeams;
   seedData: typeof seedData;
   setupFootballData: typeof setupFootballData;
