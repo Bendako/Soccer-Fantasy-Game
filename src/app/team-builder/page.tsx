@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import FormationPitch, { Player } from '@/components/FormationPitch'
 import { api } from '../../../convex/_generated/api'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import type { Id } from "../../../convex/_generated/dataModel"
 
@@ -30,7 +30,7 @@ const TOURNAMENTS = {
 
 type TournamentKey = keyof typeof TOURNAMENTS
 
-export default function TeamBuilder() {
+function TeamBuilderContent() {
   const { user } = useUser()
   const searchParams = useSearchParams()
   
@@ -314,30 +314,28 @@ export default function TeamBuilder() {
               isDeadlinePassed={isDeadlinePassed}
             />
           ) : (
-            <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-6 sm:p-8 text-center">
-              <div className="text-6xl sm:text-8xl mb-4">⚽</div>
-              <h3 className="text-xl sm:text-2xl font-bold text-slate-800 mb-3">No Players Available</h3>
-              <p className="text-slate-600 mb-6 max-w-md mx-auto">
-                There are currently no players in the database. Please check back later or contact support.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Link href="/">
-                  <Button variant="outline" className="w-full sm:w-auto min-h-[44px] touch-manipulation">
-                    ← Back to Home
-                  </Button>
-                </Link>
-                <Button 
-                  variant="default" 
-                  className="w-full sm:w-auto min-h-[44px] touch-manipulation"
-                  onClick={() => window.location.reload()}
-                >
-                  🔄 Refresh Page
-                </Button>
-              </div>
+            <div className="text-center py-8">
+              <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-white">Loading players...</p>
             </div>
           )}
         </div>
       </div>
     </div>
+  )
+}
+
+export default function TeamBuilder() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-green-800 to-teal-700 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white">Loading team builder...</p>
+        </div>
+      </div>
+    }>
+      <TeamBuilderContent />
+    </Suspense>
   )
 } 
