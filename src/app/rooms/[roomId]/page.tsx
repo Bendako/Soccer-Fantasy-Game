@@ -18,6 +18,7 @@ export default function RoomDashboard() {
   const [userConvexId, setUserConvexId] = useState<Id<"users"> | null>(null)
   const [showShareModal, setShowShareModal] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [currentTime, setCurrentTime] = useState(Date.now())
 
   // Create user mutation
   const createUser = useMutation(api.users.createUser)
@@ -29,6 +30,20 @@ export default function RoomDashboard() {
   const roomDetails = useQuery(api.fantasyLeagues.getLeagueWithMembers,
     roomId ? { fantasyLeagueId: roomId } : "skip"
   )
+
+  // Get current gameweek for deadline info
+  const currentGameweek = useQuery(api.gameweeks.getCurrentGameweek,
+    roomDetails ? { league: roomDetails.league } : "skip"
+  )
+
+  // Update current time every second for real-time countdown
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now())
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [])
 
   // Handle room deletion
   const handleDeleteRoom = async () => {
@@ -43,6 +58,46 @@ export default function RoomDashboard() {
     } catch (error) {
       console.error('Failed to delete room:', error)
       alert('Failed to delete room. Please try again.')
+    }
+  }
+
+  // Format time until deadline
+  const formatTimeUntilDeadline = (milliseconds: number): string => {
+    if (milliseconds <= 0) return "Deadline passed"
+    
+    const days = Math.floor(milliseconds / (24 * 60 * 60 * 1000))
+    const hours = Math.floor((milliseconds % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000))
+    const minutes = Math.floor((milliseconds % (60 * 60 * 1000)) / (60 * 1000))
+    const seconds = Math.floor((milliseconds % (60 * 1000)) / 1000)
+    
+    if (days > 0) return `${days}d ${hours}h ${minutes}m`
+    if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`
+    if (minutes > 0) return `${minutes}m ${seconds}s`
+    return `${seconds}s`
+  }
+
+  // Calculate deadline info
+  const getDeadlineInfo = () => {
+    if (!currentGameweek) return { status: 'No Active Gameweek', timeLeft: '', isUrgent: false, isPassed: false }
+    
+    const timeUntilDeadline = currentGameweek.deadline - currentTime
+    const isPassed = timeUntilDeadline <= 0
+    const isUrgent = timeUntilDeadline <= 24 * 60 * 60 * 1000 && !isPassed // Less than 24 hours
+    
+    if (isPassed) {
+      return { 
+        status: 'Deadline Passed', 
+        timeLeft: 'Teams Locked', 
+        isUrgent: false, 
+        isPassed: true 
+      }
+    }
+    
+    return {
+      status: 'Active',
+      timeLeft: formatTimeUntilDeadline(timeUntilDeadline),
+      isUrgent,
+      isPassed: false
     }
   }
 
@@ -129,6 +184,8 @@ export default function RoomDashboard() {
     champions_league: '🏆 Champions League'
   }
 
+  const deadlineInfo = getDeadlineInfo()
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 py-8 px-4">
       <div className="max-w-4xl mx-auto">
@@ -144,6 +201,37 @@ export default function RoomDashboard() {
           </p>
         </div>
 
+        {/* Gameweek Deadline Banner */}
+        {currentGameweek && (
+          <div className={`mb-6 p-4 rounded-xl border backdrop-blur-md ${
+            deadlineInfo.isPassed 
+              ? 'bg-red-500/20 border-red-400/30' 
+              : deadlineInfo.isUrgent 
+                ? 'bg-orange-500/20 border-orange-400/30' 
+                : 'bg-blue-500/20 border-blue-400/30'
+          }`}>
+            <div className="text-center">
+              <div className="text-sm text-white/80 mb-1">
+                Gameweek {currentGameweek.number} • {currentGameweek.season}
+              </div>
+              <div className={`text-lg font-bold ${
+                deadlineInfo.isPassed 
+                  ? 'text-red-200' 
+                  : deadlineInfo.isUrgent 
+                    ? 'text-orange-200' 
+                    : 'text-blue-200'
+              }`}>
+                {deadlineInfo.isPassed ? '🔒 Teams Locked' : `⏰ ${deadlineInfo.timeLeft} remaining`}
+              </div>
+              {!deadlineInfo.isPassed && (
+                <div className="text-xs text-white/60 mt-1">
+                  Deadline: {new Date(currentGameweek.deadline).toLocaleDateString()} at {new Date(currentGameweek.deadline).toLocaleTimeString()}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 mb-8 justify-center">
           {isCreator && (
@@ -155,7 +243,13 @@ export default function RoomDashboard() {
             </Button>
           )}
           <Link href={`/team-builder?league=${roomDetails.league}`}>
-            <Button variant="outline" className="w-full sm:w-auto text-white border-white/50 hover:bg-white/10">
+            <Button 
+              variant="outline" 
+              className={`w-full sm:w-auto text-white border-white/50 hover:bg-white/10 ${
+                deadlineInfo.isPassed ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+              disabled={deadlineInfo.isPassed}
+            >
               ⚡ Build Your Team
             </Button>
           </Link>
@@ -186,7 +280,15 @@ export default function RoomDashboard() {
             <div className="text-emerald-100">Spots Available</div>
           </div>
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 text-center">
-            <div className="text-3xl font-bold text-white mb-2">{roomDetails.status === 'active' ? 'Active' : 'Upcoming'}</div>
+            <div className={`text-3xl font-bold mb-2 ${
+              deadlineInfo.isPassed 
+                ? 'text-red-300' 
+                : deadlineInfo.isUrgent 
+                  ? 'text-orange-300' 
+                  : 'text-white'
+            }`}>
+              {deadlineInfo.status}
+            </div>
             <div className="text-emerald-100">Room Status</div>
           </div>
         </div>
