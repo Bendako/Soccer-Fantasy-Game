@@ -32,14 +32,14 @@ export const fetchRealPlayerData = action({
     league: v.string(), // "premier_league", "champions_league", "la_liga"
     useTestData: v.optional(v.boolean()),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<any> => {
     console.log(`Fetching real player data for ${args.league}...`);
 
     if (args.useTestData || args.league === "premier_league") {
       // Generate enhanced test data with more realistic stats for immediate functionality
       const playerData = generateEnhancedPlayerData(args.league);
       
-      const results = await ctx.runMutation(internal.realPlayerDataFetcher.storeRealPlayerData, {
+      const results: any = await ctx.runMutation(internal.realPlayerDataFetcher.storeRealPlayerData, {
         league: args.league,
         players: playerData.players,
         teams: playerData.teams
@@ -261,7 +261,7 @@ export const storeRealPlayerData = internalMutation({
       await ctx.db.insert("players", {
         name: playerData.name,
         position: playerData.position,
-        realTeamId: teamId,
+        realTeamId: teamId as any,
         imageUrl: playerData.imageUrl,
         jerseyNumber: playerData.jerseyNumber,
         injured: false,

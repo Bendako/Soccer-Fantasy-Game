@@ -104,6 +104,16 @@ export default defineSchema({
     deadline: v.number(), // Timestamp
     status: v.string(), // "upcoming", "active", "completed"
     isActive: v.boolean(),
+    firstMatchTime: v.optional(v.string()), // ISO string of first match
+    matches: v.optional(v.array(v.object({
+      id: v.any(),
+      gameweek: v.number(),
+      utcDate: v.string(),
+      homeTeam: v.any(),
+      awayTeam: v.any(),
+      status: v.any(),
+      competition: v.any()
+    }))),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
