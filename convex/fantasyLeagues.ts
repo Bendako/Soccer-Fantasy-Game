@@ -1,6 +1,25 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
+// Enhanced code generation with football-themed memorable codes
+const generateRoomCode = () => {
+  const footballWords = [
+    'SOCCER', 'GOAL', 'KICK', 'PASS', 'DRIBBLE', 'TACKLE', 'SAVE', 'SCORE',
+    'PITCH', 'FIELD', 'BALL', 'NET', 'POST', 'CORNER', 'FREE', 'PENALTY'
+  ];
+  
+  const colors = [
+    'RED', 'BLUE', 'GREEN', 'YELLOW', 'BLACK', 'WHITE', 'GOLD', 'SILVER',
+    'ORANGE', 'PURPLE', 'PINK', 'BROWN', 'GRAY', 'CYAN', 'LIME', 'NAVY'
+  ];
+  
+  const numbers = Math.floor(Math.random() * 99) + 1;
+  const footballWord = footballWords[Math.floor(Math.random() * footballWords.length)];
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  
+  return `${footballWord}-${color}-${numbers}`;
+};
+
 // Create a fantasy league
 export const createFantasyLeague = mutation({
   args: {
@@ -11,8 +30,27 @@ export const createFantasyLeague = mutation({
     league: v.string(), // Which real league this fantasy league follows
   },
   handler: async (ctx, args) => {
-    // Generate a random join code for private leagues
-    const code = args.type === "private" ? Math.random().toString(36).substring(2, 8).toUpperCase() : undefined;
+    // Generate a memorable code for private leagues
+    let code: string | undefined;
+    if (args.type === "private") {
+      // Ensure code is unique
+      let isUnique = false;
+      let attempts = 0;
+      while (!isUnique && attempts < 10) {
+        code = generateRoomCode();
+        const existing = await ctx.db
+          .query("fantasyLeagues")
+          .withIndex("by_code", (q) => q.eq("code", code))
+          .unique();
+        isUnique = !existing;
+        attempts++;
+      }
+      
+      // Fallback to timestamp-based code if we can't generate unique one
+      if (!isUnique) {
+        code = `ROOM-${Date.now().toString().slice(-6)}`;
+      }
+    }
     
     const fantasyLeagueId = await ctx.db.insert("fantasyLeagues", {
       ...args,
@@ -331,5 +369,104 @@ export const createDefaultLeague = mutation({
     });
     
     return await ctx.db.get(leagueId);
+  },
+});
+
+// Regenerate room code for league creators
+export const regenerateRoomCode = mutation({
+  args: {
+    fantasyLeagueId: v.id("fantasyLeagues"),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const league = await ctx.db.get(args.fantasyLeagueId);
+    if (!league) {
+      throw new Error("League not found");
+    }
+
+    // Check if user is the creator
+    if (league.creatorId !== args.userId) {
+      throw new Error("Only the room creator can regenerate the code");
+    }
+
+    // Generate new unique code
+    let newCode: string = generateRoomCode();
+    let isUnique = false;
+    let attempts = 0;
+    
+    while (!isUnique && attempts < 10) {
+      const existing = await ctx.db
+        .query("fantasyLeagues")
+        .withIndex("by_code", (q) => q.eq("code", newCode))
+        .unique();
+      isUnique = !existing;
+      if (!isUnique) {
+        newCode = generateRoomCode();
+      }
+      attempts++;
+    }
+    
+    // Fallback if needed
+    if (!isUnique) {
+      newCode = `ROOM-${Date.now().toString().slice(-6)}`;
+    }
+
+    // Update league with new code
+    await ctx.db.patch(args.fantasyLeagueId, {
+      code: newCode,
+      updatedAt: Date.now(),
+    });
+
+    return newCode;
+  },
+});
+
+// Get sharing information for a room
+export const getRoomSharingInfo = query({
+  args: { fantasyLeagueId: v.id("fantasyLeagues") },
+  handler: async (ctx, args) => {
+    const league = await ctx.db.get(args.fantasyLeagueId);
+    if (!league || !league.code) return null;
+
+    const creator = await ctx.db.get(league.creatorId);
+    
+    // Get recent joiners (last 5)
+    const memberships = await ctx.db
+      .query("leagueMemberships")
+      .withIndex("by_league", (q) => q.eq("fantasyLeagueId", args.fantasyLeagueId))
+      .order("desc")
+      .take(5);
+
+    const recentMembers = await Promise.all(
+      memberships.map(async (membership) => {
+        const user = await ctx.db.get(membership.userId);
+        return {
+          name: user?.name,
+          joinedAt: membership.joinedAt,
+        };
+      })
+    );
+
+    return {
+      code: league.code,
+      roomName: league.name,
+      league: league.league,
+      creator: creator?.name,
+      memberCount: league.currentParticipants,
+      maxMembers: league.maxParticipants,
+      recentMembers,
+      shareUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/join/${league.code}`,
+    };
+  },
+});
+
+// Get league by join code
+export const getLeagueByCode = query({
+  args: { code: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("fantasyLeagues")
+      .withIndex("by_code", (q) => q.eq("code", args.code))
+      .unique();
   },
 }); 

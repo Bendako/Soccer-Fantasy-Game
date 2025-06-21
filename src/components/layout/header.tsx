@@ -21,6 +21,12 @@ export default function Header() {
           <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
             Home
           </Link>
+          <Link href="/rooms" className="text-blue-600 hover:text-blue-700 transition-colors font-semibold">
+            My Rooms
+          </Link>
+          <Link href="/rooms/create" className="text-emerald-600 hover:text-emerald-700 transition-colors font-semibold">
+            Create Room
+          </Link>
           <Link href="/team-builder" className="text-gray-600 hover:text-gray-900 transition-colors">
             Team Builder
           </Link>
@@ -55,17 +61,23 @@ export default function Header() {
       </div>
 
       <div className="md:hidden border-t px-4 py-3">
-        <nav className="flex items-center justify-center space-x-4 sm:space-x-6 text-sm">
-          <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors py-2 px-3 rounded touch-manipulation">
+        <nav className="flex items-center justify-center space-x-3 sm:space-x-4 text-sm">
+          <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors py-2 px-2 rounded touch-manipulation">
             Home
           </Link>
-          <Link href="/team-builder" className="text-gray-600 hover:text-gray-900 transition-colors py-2 px-3 rounded touch-manipulation whitespace-nowrap">
+          <Link href="/rooms" className="text-blue-600 hover:text-blue-700 transition-colors py-2 px-2 rounded touch-manipulation whitespace-nowrap font-semibold">
+            My Rooms
+          </Link>
+          <Link href="/rooms/create" className="text-emerald-600 hover:text-emerald-700 transition-colors py-2 px-2 rounded touch-manipulation whitespace-nowrap font-semibold">
+            Create Room
+          </Link>
+          <Link href="/team-builder" className="text-gray-600 hover:text-gray-900 transition-colors py-2 px-2 rounded touch-manipulation whitespace-nowrap">
             Team Builder
           </Link>
-          <Link href="/leagues" className="text-gray-600 hover:text-gray-900 transition-colors py-2 px-3 rounded touch-manipulation">
+          <Link href="/leagues" className="text-gray-600 hover:text-gray-900 transition-colors py-2 px-2 rounded touch-manipulation">
             Leagues
           </Link>
-          <Link href="/admin/seed" className="text-gray-600 hover:text-gray-900 transition-colors py-2 px-3 rounded touch-manipulation">
+          <Link href="/admin/seed" className="text-gray-600 hover:text-gray-900 transition-colors py-2 px-2 rounded touch-manipulation">
             Admin
           </Link>
         </nav>

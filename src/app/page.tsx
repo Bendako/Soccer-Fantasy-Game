@@ -24,16 +24,18 @@ export default function Home() {
           </p>
           
           <div className="flex flex-col gap-3 sm:gap-4 justify-center items-center max-w-sm sm:max-w-none mx-auto">
-            <Link href="/team-builder" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-6 sm:px-8 py-4 text-base sm:text-lg font-semibold shadow-lg transform hover:scale-105 transition-all min-h-[50px] touch-manipulation">
-                ⚡ Build Your Team
+            <Link href="/rooms/create" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 sm:px-8 py-4 text-base sm:text-lg font-semibold shadow-lg transform hover:scale-105 transition-all min-h-[50px] touch-manipulation">
+                🎮 Create Room & Invite Friends
               </Button>
             </Link>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
+              <Link href="/team-builder" className="w-full sm:w-auto">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto border-2 border-green-300 hover:border-green-400 text-green-700 hover:text-green-800 px-6 sm:px-8 py-4 text-base sm:text-lg min-h-[50px] touch-manipulation">
+                  ⚡ Build Your Team
+                </Button>
+              </Link>
               <Button variant="outline" size="lg" className="w-full sm:w-auto border-2 border-gray-300 hover:border-gray-400 px-6 sm:px-8 py-4 text-base sm:text-lg min-h-[50px] touch-manipulation">
-                📖 Learn How to Play
-              </Button>
-              <Button variant="outline" size="lg" className="w-full sm:w-auto border-2 border-green-300 hover:border-green-400 text-green-700 hover:text-green-800 px-6 sm:px-8 py-4 text-base sm:text-lg min-h-[50px] touch-manipulation">
                 🏆 View Leagues
               </Button>
             </div>
