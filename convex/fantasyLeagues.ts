@@ -455,7 +455,7 @@ export const getRoomSharingInfo = query({
       memberCount: league.currentParticipants,
       maxMembers: league.maxParticipants,
       recentMembers,
-      shareUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/join/${league.code}`,
+      shareUrl: `https://soccer-fantasy-game.vercel.app/join/${league.code}`,
     };
   },
 });
