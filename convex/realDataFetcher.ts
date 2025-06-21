@@ -2,25 +2,25 @@ import { v } from "convex/values";
 import { action, internalMutation, internalQuery } from "./_generated/server";
 import { internal, api } from "./_generated/api";
 
-// Tournament configuration with real API mappings
-const TOURNAMENT_CONFIG = {
+// Tournament configuration mapping
+const TOURNAMENT_CONFIG: Record<string, any> = {
   premier_league: {
     name: "Premier League",
-    apiFootballId: 39, // Premier League 2024-25
-    footballDataId: "PL",
-    season: "2024-25"
+    apiFootballId: 39, // Premier League 2025-26
+    footballDataCode: "PL",
+    season: "2025-26"
   },
   champions_league: {
-    name: "Champions League",
-    apiFootballId: 2, // UEFA Champions League 2024-25
-    footballDataId: "CL",
-    season: "2024-25"
+    name: "UEFA Champions League",
+    apiFootballId: 2, // UEFA Champions League 2025-26
+    footballDataCode: "CL",
+    season: "2025-26"
   },
   la_liga: {
     name: "La Liga",
-    apiFootballId: 140, // La Liga 2024-25
-    footballDataId: "PD",
-    season: "2024-25"
+    apiFootballId: 140, // La Liga 2025-26
+    footballDataCode: "PD",
+    season: "2025-26"
   }
 };
 
@@ -54,7 +54,7 @@ export const fetchRealFixturesAndGameweeks = action({
     } else {
       try {
         // Try Football-Data.org API first (free tier)
-        fixtures = await fetchFromFootballDataAPI(config.footballDataId);
+        fixtures = await fetchFromFootballDataAPI(config.footballDataCode);
       } catch {
         console.log("Football-Data API failed, trying API-Football...");
         try {
@@ -139,14 +139,15 @@ async function fetchFromAPIFootball(leagueId: number) {
 // Generate test fixtures for immediate functionality
 function generateTestFixtures(league: string, config: { name: string }) {
   const fixtures = [];
-  const now = new Date();
+  // Use actual Premier League 2025-26 season start date
+  const seasonStart = new Date('2025-08-15T18:00:00Z'); // Friday, Aug 15, 2025 at 6 PM UTC
   
   // Create 38 gameweeks for Premier League, 8 for Champions League group stage
   const totalGameweeks = league === "champions_league" ? 8 : 38;
   
   for (let gameweek = 1; gameweek <= totalGameweeks; gameweek++) {
     // Each gameweek starts 7 days after the previous
-    const gameweekStart = new Date(now.getTime() + (gameweek - 1) * 7 * 24 * 60 * 60 * 1000);
+    const gameweekStart = new Date(seasonStart.getTime() + (gameweek - 1) * 7 * 24 * 60 * 60 * 1000);
     
     // Create 10 matches per gameweek (realistic for Premier League)
     const matchesPerGameweek = league === "champions_league" ? 8 : 10;
@@ -238,7 +239,7 @@ async function processFixturesIntoGameweeks(
 // Extract gameweek number from date (simple logic for now)
 function extractGameweekFromDate(dateString: string): number {
   const date = new Date(dateString);
-  const seasonStart = new Date('2024-08-17'); // Premier League 2024-25 start date
+  const seasonStart = new Date('2025-08-15'); // Premier League 2025-26 start date
   const weeksDiff = Math.floor((date.getTime() - seasonStart.getTime()) / (7 * 24 * 60 * 60 * 1000));
   return Math.max(1, Math.min(38, weeksDiff + 1));
 }
