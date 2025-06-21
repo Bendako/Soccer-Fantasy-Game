@@ -30,9 +30,6 @@ export default function Header() {
           <Link href="/team-builder" className="text-gray-600 hover:text-gray-900 transition-colors">
             Team Builder
           </Link>
-          <Link href="/leagues" className="text-gray-600 hover:text-gray-900 transition-colors">
-            Leagues
-          </Link>
           <Link href="/admin/seed" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
             Admin
           </Link>
@@ -73,9 +70,6 @@ export default function Header() {
           </Link>
           <Link href="/team-builder" className="text-gray-600 hover:text-gray-900 transition-colors py-2 px-2 rounded touch-manipulation whitespace-nowrap">
             Team Builder
-          </Link>
-          <Link href="/leagues" className="text-gray-600 hover:text-gray-900 transition-colors py-2 px-2 rounded touch-manipulation">
-            Leagues
           </Link>
           <Link href="/admin/seed" className="text-gray-600 hover:text-gray-900 transition-colors py-2 px-2 rounded touch-manipulation">
             Admin
