@@ -282,7 +282,7 @@ export const storeGameweeks = internalMutation({
     
     // Activate the first upcoming gameweek
     if (args.gameweeks.length > 0) {
-      const firstUpcoming = args.gameweeks.find(gw => gw.deadline > now) || args.gameweeks[0];
+      const firstUpcoming = args.gameweeks.find((gw: any) => gw.deadline > now) || args.gameweeks[0];
       
       await ctx.db
         .query("gameweeks")
