@@ -1,6 +1,6 @@
 'use client'
 
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import { useQuery, useMutation } from 'convex/react'
 import { Button } from '@/components/ui/button'
@@ -12,18 +12,39 @@ import type { Id } from "../../../../convex/_generated/dataModel"
 
 export default function RoomDashboard() {
   const params = useParams()
+  const router = useRouter()
   const roomId = params?.roomId as Id<"fantasyLeagues">
   const { user } = useUser()
   const [userConvexId, setUserConvexId] = useState<Id<"users"> | null>(null)
   const [showShareModal, setShowShareModal] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   // Create user mutation
   const createUser = useMutation(api.users.createUser)
+  
+  // Delete room mutation
+  const deleteRoom = useMutation(api.fantasyLeagues.deleteFantasyLeague)
 
   // Get room details with members
   const roomDetails = useQuery(api.fantasyLeagues.getLeagueWithMembers,
     roomId ? { fantasyLeagueId: roomId } : "skip"
   )
+
+  // Handle room deletion
+  const handleDeleteRoom = async () => {
+    if (!userConvexId || !roomId) return
+    
+    try {
+      await deleteRoom({
+        fantasyLeagueId: roomId,
+        userId: userConvexId
+      })
+      router.push('/rooms')
+    } catch (error) {
+      console.error('Failed to delete room:', error)
+      alert('Failed to delete room. Please try again.')
+    }
+  }
 
   // Initialize user
   useEffect(() => {
@@ -141,6 +162,15 @@ export default function RoomDashboard() {
           <Button variant="outline" className="text-white border-white/50 hover:bg-white/10">
             📊 View Leaderboard
           </Button>
+          {isCreator && (
+            <Button
+              onClick={() => setShowDeleteConfirm(true)}
+              variant="outline"
+              className="text-red-300 border-red-300/50 hover:bg-red-500/20"
+            >
+              🗑️ Delete Room
+            </Button>
+          )}
         </div>
 
         {/* Room Stats */}
@@ -220,6 +250,36 @@ export default function RoomDashboard() {
           isOpen={showShareModal}
           onClose={() => setShowShareModal(false)}
         />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 max-w-md w-full">
+            <div className="text-center">
+              <div className="text-6xl mb-4">⚠️</div>
+              <h2 className="text-2xl font-bold text-white mb-4">Delete Room?</h2>
+              <p className="text-emerald-100 mb-6">
+                Are you sure you want to delete &quot;{roomDetails.name}&quot;? This action cannot be undone and will remove all members and their data.
+              </p>
+              <div className="flex gap-4">
+                <Button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  variant="outline"
+                  className="flex-1 text-white border-white/50 hover:bg-white/10"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleDeleteRoom}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                >
+                  Delete Room
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

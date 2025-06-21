@@ -469,4 +469,58 @@ export const getLeagueByCode = query({
       .withIndex("by_code", (q) => q.eq("code", args.code))
       .unique();
   },
-}); 
+});
+
+// Delete a fantasy league (only by creator)
+export const deleteFantasyLeague = mutation({
+  args: {
+    fantasyLeagueId: v.id("fantasyLeagues"),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const league = await ctx.db.get(args.fantasyLeagueId);
+    if (!league) {
+      throw new Error("League not found");
+    }
+
+    // Check if user is the creator
+    if (league.creatorId !== args.userId) {
+      throw new Error("Only the room creator can delete the room");
+    }
+
+    // Delete all league memberships
+    const memberships = await ctx.db
+      .query("leagueMemberships")
+      .withIndex("by_league", (q) => q.eq("fantasyLeagueId", args.fantasyLeagueId))
+      .collect();
+
+    for (const membership of memberships) {
+      await ctx.db.delete(membership._id);
+    }
+
+    // Delete all user teams for this league
+    const userTeams = await ctx.db
+      .query("userTeams")
+      .withIndex("by_league", (q) => q.eq("fantasyLeagueId", args.fantasyLeagueId))
+      .collect();
+
+    for (const team of userTeams) {
+      await ctx.db.delete(team._id);
+    }
+
+    // Delete all league standings for this league
+    const standings = await ctx.db
+      .query("leagueStandings")
+      .filter((q) => q.eq(q.field("fantasyLeagueId"), args.fantasyLeagueId))
+      .collect();
+
+    for (const standing of standings) {
+      await ctx.db.delete(standing._id);
+    }
+
+    // Finally, delete the league itself
+    await ctx.db.delete(args.fantasyLeagueId);
+
+    return { success: true };
+  },
+});
