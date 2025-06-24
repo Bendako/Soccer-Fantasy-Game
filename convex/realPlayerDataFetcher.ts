@@ -1,6 +1,22 @@
 import { v } from "convex/values";
 import { action, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { Id } from "./_generated/dataModel";
+
+// Return type interface for fetchRealPlayerData
+interface FetchPlayerDataResult {
+  league: string;
+  playersCreated: number;
+  teamsCreated: number;
+  status: string;
+  dataSource: string;
+}
+
+// Return type interface for storeRealPlayerData
+interface StoreRealPlayerDataResult {
+  teamsCreated: number;
+  playersCreated: number;
+}
 
 // Real teams mapping for Premier League 2024-25
 const PREMIER_LEAGUE_TEAMS = [
@@ -32,14 +48,14 @@ export const fetchRealPlayerData = action({
     league: v.string(), // "premier_league", "champions_league", "la_liga"
     useTestData: v.optional(v.boolean()),
   },
-  handler: async (ctx, args): Promise<any> => {
+  handler: async (ctx, args): Promise<FetchPlayerDataResult> => {
     console.log(`Fetching real player data for ${args.league}...`);
 
     if (args.useTestData || args.league === "premier_league") {
       // Generate enhanced test data with more realistic stats for immediate functionality
       const playerData = generateEnhancedPlayerData(args.league);
       
-      const results: any = await ctx.runMutation(internal.realPlayerDataFetcher.storeRealPlayerData, {
+      const results: StoreRealPlayerDataResult = await ctx.runMutation(internal.realPlayerDataFetcher.storeRealPlayerData, {
         league: args.league,
         players: playerData.players,
         teams: playerData.teams
@@ -239,7 +255,7 @@ export const storeRealPlayerData = internalMutation({
     }
 
     // Create teams
-    const teamIdMap = new Map();
+    const teamIdMap = new Map<string, Id<"realTeams">>();
     for (const teamData of args.teams) {
       const teamId = await ctx.db.insert("realTeams", {
         ...teamData,
@@ -261,7 +277,7 @@ export const storeRealPlayerData = internalMutation({
       await ctx.db.insert("players", {
         name: playerData.name,
         position: playerData.position,
-        realTeamId: teamId as any,
+        realTeamId: teamId,
         imageUrl: playerData.imageUrl,
         jerseyNumber: playerData.jerseyNumber,
         injured: false,

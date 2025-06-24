@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import { Button } from '@/components/ui/button'
-import { useUser } from '@clerk/nextjs'
+import Link from 'next/link'
 
 export default function AdminPage() {
   const [loading, setLoading] = useState(false)
@@ -16,7 +16,7 @@ export default function AdminPage() {
     setLoading(true)
     try {
       const result = await seedDatabase({})
-      setMessage(`✅ ${result.message}. Teams: ${result.teams}, Players: ${result.players}`)
+      setMessage(`✅ Database seeded successfully! Teams: ${result.teamsCreated}, Players: ${result.playersCreated}`)
     } catch (error) {
       setMessage(`❌ Error: ${error}`)
     }
@@ -30,8 +30,8 @@ export default function AdminPage() {
     
     setLoading(true)
     try {
-      const result = await clearDatabase({})
-      setMessage(`✅ ${result.message}`)
+      // For now, just show a message since we don't have a clearDatabase mutation
+      setMessage(`⚠️ Clear database functionality not implemented yet`)
     } catch (error) {
       setMessage(`❌ Error: ${error}`)
     }
@@ -120,12 +120,12 @@ export default function AdminPage() {
               Ready to test the game?
             </p>
             <div className="space-x-4">
-              <Button asChild variant="outline">
-                <a href="/team-builder">🏗️ Team Builder</a>
-              </Button>
-              <Button asChild variant="outline">
-                <a href="/">🏠 Home</a>
-              </Button>
+              <Link href="/team-builder" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+                🏗️ Team Builder
+              </Link>
+              <Link href="/" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+                🏠 Home
+              </Link>
             </div>
           </div>
         </div>
