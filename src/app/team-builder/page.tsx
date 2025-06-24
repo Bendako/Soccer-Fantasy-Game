@@ -43,6 +43,9 @@ function TeamBuilderContent() {
     return 'premier_league'
   }
   
+  // Get the roomId from URL params (if user came from a specific room)
+  const roomIdParam = searchParams?.get('roomId') as Id<"fantasyLeagues"> | null
+  
   const [selectedLeague, setSelectedLeague] = useState<TournamentKey>(getDefaultLeague())
   const [userConvexId, setUserConvexId] = useState<Id<"users"> | null>(null)
 
@@ -61,16 +64,23 @@ function TeamBuilderContent() {
     userConvexId ? { userId: userConvexId } : "skip"
   )
 
+  // Fetch specific room details if roomId is provided
+  const roomDetails = useQuery(api.fantasyLeagues.getLeagueWithMembers,
+    roomIdParam ? { fantasyLeagueId: roomIdParam } : "skip"
+  )
+
   // Fetch players data for the selected league
   const players = useQuery(api.players.getPlayersByLeague, { league: selectedLeague })
 
+  // Determine which league to use for team building
+  const currentLeagueId = roomIdParam || userLeagues?.[0]?._id
+  
   // Get user's existing team for current gameweek (if any)
-  const currentLeagueId = userLeagues?.[0]?._id
   const existingTeam = useQuery(api.fantasyTeams.getUserTeam,
     userConvexId && currentGameweek && currentLeagueId ? {
       userId: userConvexId,
       gameweekId: currentGameweek._id,
-      fantasyLeagueId: currentLeagueId
+      fantasyLeagueId: currentLeagueId!
     } : "skip"
   )
 
@@ -95,10 +105,10 @@ function TeamBuilderContent() {
     initializeUser()
   }, [user, createUser, userConvexId])
 
-  // Create default league if user has no leagues
+  // Create default league if user has no leagues and isn't coming from a specific room
   useEffect(() => {
     const ensureUserHasLeague = async () => {
-      if (userConvexId && userLeagues && userLeagues.length === 0) {
+      if (userConvexId && userLeagues && userLeagues.length === 0 && !roomIdParam) {
         try {
           await createDefaultLeague({
             userId: userConvexId,
@@ -112,7 +122,7 @@ function TeamBuilderContent() {
     }
 
     ensureUserHasLeague()
-  }, [userConvexId, userLeagues, selectedLeague, createDefaultLeague])
+  }, [userConvexId, userLeagues, selectedLeague, createDefaultLeague, roomIdParam])
 
   // Activate first gameweek if none is active
   useEffect(() => {
@@ -179,13 +189,35 @@ function TeamBuilderContent() {
     )
   }
 
-  // Show loading state while creating default league
-  if (userConvexId && userLeagues && userLeagues.length === 0) {
+  // Show loading state while creating default league (only if not coming from a specific room)
+  if (userConvexId && userLeagues && userLeagues.length === 0 && !roomIdParam) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-white">Setting up your default league...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show message if coming from a specific room but can't access it
+  if (roomIdParam && !roomDetails) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="text-center max-w-md mx-auto">
+          <h1 className="text-xl sm:text-2xl font-bold mb-4 text-white">Room Not Found</h1>
+          <p className="text-emerald-100 mb-6">
+            You don&apos;t have access to this room or it doesn&apos;t exist.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link href="/">
+              <Button variant="outline" className="w-full sm:w-auto">← Back to Home</Button>
+            </Link>
+            <Link href="/rooms">
+              <Button className="w-full sm:w-auto">My Rooms</Button>
+            </Link>
+          </div>
         </div>
       </div>
     )
@@ -261,8 +293,13 @@ function TeamBuilderContent() {
                 <p className="text-white font-bold">{currentGameweek.number} - {currentGameweek.season}</p>
               </div>
               <div>
-                <span className="text-emerald-200 font-medium">League:</span>
-                <p className="text-white font-bold truncate">{userLeagues?.[0]?.name || 'Default League'}</p>
+                <span className="text-emerald-200 font-medium">Room:</span>
+                <p className="text-white font-bold truncate">
+                  {roomIdParam 
+                    ? roomDetails?.name || 'Room'
+                    : userLeagues?.[0]?.name || 'Default League'
+                  }
+                </p>
               </div>
               <div className="xs:col-span-2 sm:col-span-1">
                 <span className="text-emerald-200 font-medium">Deadline:</span>
@@ -302,14 +339,14 @@ function TeamBuilderContent() {
 
         {/* Main Content - Formation Pitch */}
         <div className="w-full">
-          {convertedPlayers.length > 0 && userLeagues && userLeagues.length > 0 ? (
+          {convertedPlayers.length > 0 && currentLeagueId ? (
             <FormationPitch
               selectedPlayers={convertedPlayers}
               onPlayerSelect={() => {}}
               onRemovePlayer={() => {}}
               userId={userConvexId}
               gameweekId={currentGameweek._id}
-              fantasyLeagueId={userLeagues[0]._id}
+              fantasyLeagueId={currentLeagueId}
               existingTeam={existingTeam}
               isDeadlinePassed={isDeadlinePassed}
             />

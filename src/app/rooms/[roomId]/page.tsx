@@ -242,7 +242,7 @@ export default function RoomDashboard() {
               📤 Share Room
             </Button>
           )}
-          <Link href={`/team-builder?league=${roomDetails.league}`}>
+          <Link href={`/team-builder?league=${roomDetails.league}&roomId=${roomId}`}>
             <Button 
               variant="outline" 
               className={`w-full sm:w-auto text-white border-white/50 hover:bg-white/10 ${
