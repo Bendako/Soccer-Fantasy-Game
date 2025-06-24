@@ -102,11 +102,6 @@ export default function MyRooms() {
               ➕ Create New Room
             </Button>
           </Link>
-          <Link href="/team-builder">
-            <Button variant="outline" className="w-full sm:w-auto text-white border-white/50 hover:bg-white/10">
-              ⚡ Build Your Team
-            </Button>
-          </Link>
         </div>
 
         {/* No rooms state */}
