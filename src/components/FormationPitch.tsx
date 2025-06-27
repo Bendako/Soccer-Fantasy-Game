@@ -162,6 +162,7 @@ export default function FormationPitch({
     slotId: '',
     position: ''
   });
+  const [activeOverlay, setActiveOverlay] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [searchTerm, setSearchTerm] = useState('');
@@ -172,6 +173,20 @@ export default function FormationPitch({
   const saveFantasyTeam = useMutation(api.fantasyTeams.saveFantasyTeam);
 
   const currentFormation = formations[selectedFormation];
+
+  // Close overlay on Escape key press
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && activeOverlay) {
+        setActiveOverlay(null);
+      }
+    };
+
+    if (activeOverlay) {
+      document.addEventListener('keydown', handleEscapeKey);
+      return () => document.removeEventListener('keydown', handleEscapeKey);
+    }
+  }, [activeOverlay]);
 
   // Load existing team when component mounts or existingTeam changes
   useEffect(() => {
@@ -366,6 +381,112 @@ export default function FormationPitch({
     }
   };
 
+  // Player Action Overlay Component
+  const PlayerActionOverlay = ({ 
+    slotId, 
+    player, 
+    isCaptain, 
+    isViceCaptain 
+  }: {
+    slotId: string;
+    player: Player;
+    isCaptain: boolean;
+    isViceCaptain: boolean;
+  }) => (
+    <>
+      {/* Full screen backdrop - closes overlay when clicked */}
+      <div 
+        className="fixed inset-0 z-40 bg-transparent"
+        onClick={() => setActiveOverlay(null)}
+      />
+      
+      {/* Overlay content */}
+      <div className="absolute -top-24 left-1/2 transform -translate-x-1/2 z-50 animate-in fade-in duration-200">
+        <div 
+          className="bg-black/90 backdrop-blur-sm rounded-lg shadow-xl border border-white/20"
+          onClick={(e) => e.stopPropagation()} // Prevent overlay from closing when clicking on buttons
+        >
+          {/* Player Info Header */}
+          <div className="px-3 py-2 border-b border-white/20">
+            <div className="text-white font-semibold text-sm text-center truncate">
+              {player.name}
+            </div>
+            <div className="text-white/70 text-xs text-center">
+              {player.realTeam?.shortName} • {player.totalPoints} pts
+            </div>
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="p-2 flex gap-1">
+          {/* Captain Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCaptainSelect(player._id);
+              setActiveOverlay(null);
+            }}
+            disabled={isDeadlinePassed}
+            className={`p-2 rounded-md transition-colors text-xs font-medium min-w-[60px] disabled:opacity-50 disabled:cursor-not-allowed ${
+              isCaptain 
+                ? 'bg-yellow-500 text-black' 
+                : 'bg-white/10 text-yellow-400 hover:bg-yellow-500/20'
+            }`}
+            title="Make Captain"
+          >
+            👑 {isCaptain ? 'CAPT' : 'Capt'}
+          </button>
+          
+          {/* Vice Captain Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViceCaptainSelect(player._id);
+              setActiveOverlay(null);
+            }}
+            disabled={isDeadlinePassed}
+            className={`p-2 rounded-md transition-colors text-xs font-medium min-w-[60px] disabled:opacity-50 disabled:cursor-not-allowed ${
+              isViceCaptain 
+                ? 'bg-gray-500 text-white' 
+                : 'bg-white/10 text-gray-300 hover:bg-gray-500/20'
+            }`}
+            title="Make Vice Captain"
+          >
+            ⭐ {isViceCaptain ? 'VICE' : 'Vice'}
+          </button>
+          
+          {/* Change Player Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSlotClick(slotId, player.position);
+              setActiveOverlay(null);
+            }}
+            disabled={isDeadlinePassed}
+            className="p-2 rounded-md bg-white/10 text-blue-400 hover:bg-blue-500/20 transition-colors text-xs font-medium min-w-[60px] disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Change Player"
+          >
+            🔄 Change
+          </button>
+          
+          {/* Remove Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRemoveFromSlot(slotId);
+              setActiveOverlay(null);
+            }}
+            disabled={isDeadlinePassed}
+            className="p-2 rounded-md bg-white/10 text-red-400 hover:bg-red-500/20 transition-colors text-xs font-medium min-w-[60px] disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Remove Player"
+          >
+            ❌ Remove
+          </button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+
   const getAvailablePlayersForPosition = (position: string) => {
     // Get all currently assigned player IDs
     const assignedPlayerIds = Object.values(teamFormation)
@@ -416,30 +537,39 @@ export default function FormationPitch({
     const isViceCaptain = player && viceCaptain === player._id;
 
     return (
-      <div
-        key={slotId}
-        style={style}
-        onClick={() => handleSlotClick(slotId, position)}
-        className={`
-          absolute 
-          w-10 h-10 
-          xs:w-12 xs:h-12 
-          sm:w-14 sm:h-14 
-          md:w-16 md:h-16 
-          lg:w-18 lg:h-18 
-          xl:w-20 xl:h-20
-          rounded-full border-2 flex items-center justify-center 
-          transition-all duration-200 transform -translate-x-1/2 -translate-y-1/2 
-          touch-manipulation cursor-pointer
-          ${isDeadlinePassed ? 'cursor-not-allowed opacity-75' : 'active:scale-95'}
-          ${player 
-            ? `${positionColors[position]} text-white shadow-lg ${!isDeadlinePassed ? 'hover:scale-105 hover:shadow-xl' : ''}` 
-            : `border-white/60 border-dashed bg-white/20 ${!isDeadlinePassed ? 'hover:bg-white/30 active:bg-white/40 hover:border-white/80' : ''}`
-          }
-          ${isCaptain ? 'ring-2 xs:ring-3 sm:ring-4 ring-yellow-400 ring-offset-1' : ''}
-          ${isViceCaptain ? 'ring-2 xs:ring-3 sm:ring-4 ring-gray-400 ring-offset-1' : ''}
-        `}
-      >
+      <div key={slotId} style={style} className="relative">
+        {/* Player Slot */}
+        <div
+          onClick={() => {
+            if (!player) {
+              // Empty slot - open player selection (current behavior)
+              handleSlotClick(slotId, position);
+            } else {
+              // Assigned player - show overlay
+              setActiveOverlay(activeOverlay === slotId ? null : slotId);
+            }
+          }}
+          className={`
+            absolute 
+            w-10 h-10 
+            xs:w-12 xs:h-12 
+            sm:w-14 sm:h-14 
+            md:w-16 md:h-16 
+            lg:w-18 lg:h-18 
+            xl:w-20 xl:h-20
+            rounded-full border-2 flex items-center justify-center 
+            transition-all duration-200 transform -translate-x-1/2 -translate-y-1/2 
+            touch-manipulation cursor-pointer
+            ${isDeadlinePassed ? 'cursor-not-allowed opacity-75' : 'active:scale-95'}
+            ${player 
+              ? `${positionColors[position]} text-white shadow-lg ${!isDeadlinePassed ? 'hover:scale-105 hover:shadow-xl' : ''}` 
+              : `border-white/60 border-dashed bg-white/20 ${!isDeadlinePassed ? 'hover:bg-white/30 active:bg-white/40 hover:border-white/80' : ''}`
+            }
+            ${isCaptain ? 'ring-2 xs:ring-3 sm:ring-4 ring-yellow-400 ring-offset-1' : ''}
+            ${isViceCaptain ? 'ring-2 xs:ring-3 sm:ring-4 ring-gray-400 ring-offset-1' : ''}
+            ${activeOverlay === slotId ? 'ring-2 ring-white/50' : ''}
+          `}
+        >
         {player ? (
           <div className="relative w-full h-full flex items-center justify-center">
             {/* Captain/Vice Captain Badge */}
@@ -454,9 +584,16 @@ export default function FormationPitch({
               </div>
             )}
             
-            {/* Player Jersey Number or Initials */}
-            <span className="text-xxs xs:text-xs sm:text-sm lg:text-base font-bold text-center leading-tight">
-              {player.jerseyNumber || player.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+            {/* Player Name */}
+            <span className="text-xxs xs:text-xs sm:text-sm font-bold text-center leading-tight px-1 break-words">
+              {(() => {
+                const name = player.name;
+                // For mobile (small circles), show first name only or initials if too long
+                if (name.length <= 8) return name;
+                const firstName = name.split(' ')[0];
+                if (firstName.length <= 8) return firstName;
+                return firstName.substring(0, 6) + '...';
+              })()}
             </span>
           </div>
         ) : (
@@ -465,6 +602,19 @@ export default function FormationPitch({
               {positionLabels[position]}
             </div>
           </div>
+        )}
+        </div>
+        
+
+        
+        {/* Action Overlay */}
+        {player && activeOverlay === slotId && (
+          <PlayerActionOverlay
+            slotId={slotId}
+            player={player}
+            isCaptain={!!isCaptain}
+            isViceCaptain={!!isViceCaptain}
+          />
         )}
       </div>
     );
@@ -548,7 +698,7 @@ export default function FormationPitch({
           
           {/* Bottom row - Team info */}
           <div className="bg-slate-50/80 rounded-lg p-2 xs:p-3 sm:p-4">
-            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-2 xs:gap-3 text-xs xs:text-sm">
+            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-2 xs:gap-3 text-xs xs:text-sm">
               <div className="flex items-center gap-2">
                 <span className="font-medium text-slate-600">Formation:</span>
                 <span className="text-emerald-600 font-semibold">{selectedFormation}</span>
@@ -559,11 +709,14 @@ export default function FormationPitch({
                   {captain ? teamFormation[Object.keys(teamFormation).find(key => teamFormation[key]?._id === captain) || '']?.name || 'None' : 'None'}
                 </span>
               </div>
-              <div className="flex items-center gap-2 xs:col-span-2 lg:col-span-1">
+              <div className="flex items-center gap-2">
                 <span className="font-medium text-slate-600">Vice Captain:</span>
                 <span className="text-slate-600 font-semibold truncate">
                   {viceCaptain ? teamFormation[Object.keys(teamFormation).find(key => teamFormation[key]?._id === viceCaptain) || '']?.name || 'None' : 'None'}
                 </span>
+              </div>
+              <div className="flex items-center gap-2 xs:col-span-2 lg:col-span-1">
+                <span className="font-medium text-slate-500 text-xs">💡 Click players to manage</span>
               </div>
             </div>
           </div>
@@ -781,60 +934,7 @@ export default function FormationPitch({
         </div>
       )}
 
-      {/* Assigned Players Panel */}
-      <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-4 sm:p-6">
-        <h3 className="font-bold text-slate-800 mb-4 text-lg">Assigned Players</h3>
-        <div className="space-y-3">
-          {Object.entries(teamFormation).map(([slotId, player]) => {
-            if (!player) return null;
-            const isCaptain = captain === player._id;
-            const isViceCaptain = viceCaptain === player._id;
-            
-            return (
-              <div key={slotId} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow gap-3">
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-full ${positionColors[player.position]} text-white text-sm font-bold flex items-center justify-center shadow-lg`}>
-                    {player.position === 'GK' ? 'GK' : player.position.slice(0, 1)}
-                  </div>
-                  <div>
-                    <div className="font-semibold text-slate-800">{player.name}</div>
-                    <div className="text-sm text-slate-600 flex items-center gap-2">
-                      <span className="font-medium">{player.realTeam?.shortName}</span>
-                      <span className="text-slate-400">•</span>
-                      <span className="text-emerald-600 font-semibold">{player.totalPoints} pts</span>
-                    </div>
-                  </div>
-                  {isCaptain && <span className="bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-900 text-xs px-3 py-1 rounded-full font-bold shadow-sm">CAPTAIN</span>}
-                  {isViceCaptain && <span className="bg-gradient-to-r from-slate-400 to-slate-500 text-white text-xs px-3 py-1 rounded-full font-bold shadow-sm">VICE</span>}
-                </div>
-                <div className="flex gap-2 flex-wrap">
-                  <button
-                    onClick={() => handleCaptainSelect(player._id)}
-                    disabled={isDeadlinePassed}
-                    className={`text-xs px-4 py-3 rounded-lg font-medium transition-colors touch-manipulation min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed ${isCaptain ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-900 shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-amber-100 hover:text-amber-700'}`}
-                  >
-                    Captain
-                  </button>
-                  <button
-                    onClick={() => handleViceCaptainSelect(player._id)}
-                    disabled={isDeadlinePassed}
-                    className={`text-xs px-4 py-3 rounded-lg font-medium transition-colors touch-manipulation min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed ${isViceCaptain ? 'bg-gradient-to-r from-slate-400 to-slate-500 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
-                  >
-                    Vice
-                  </button>
-                  <button
-                    onClick={() => handleRemoveFromSlot(slotId)}
-                    disabled={isDeadlinePassed}
-                    className="text-xs px-4 py-3 rounded-lg bg-gradient-to-r from-red-500 to-rose-600 text-white hover:from-red-600 hover:to-rose-700 transition-colors shadow-sm font-medium touch-manipulation min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Remove
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+
 
       {/* Save Team Section */}
       <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-4 sm:p-6">
