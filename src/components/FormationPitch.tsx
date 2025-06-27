@@ -5,6 +5,7 @@ import { useMutation } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
+import { useTranslation } from '@/lib/i18n';
 
 export interface Player {
   _id: string;
@@ -153,6 +154,7 @@ export default function FormationPitch({
   existingTeam, 
   isDeadlinePassed 
 }: FormationPitchProps) {
+  const { t } = useTranslation();
   const [selectedFormation, setSelectedFormation] = useState<string>('4-3-3');
   const [teamFormation, setTeamFormation] = useState<TeamFormation>({});
   const [captain, setCaptain] = useState<string | null>(null);
@@ -691,7 +693,7 @@ export default function FormationPitch({
                 onClick={handleClearTeam}
                 className="px-3 xs:px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors text-xs xs:text-sm min-h-touch touch-manipulation active:bg-red-700 xs:min-w-[100px]"
               >
-                Clear Team
+                {t('teamBuilder.clearTeam')}
               </button>
             )}
           </div>
@@ -700,23 +702,23 @@ export default function FormationPitch({
           <div className="bg-slate-50/80 rounded-lg p-2 xs:p-3 sm:p-4">
             <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-2 xs:gap-3 text-xs xs:text-sm">
               <div className="flex items-center gap-2">
-                <span className="font-medium text-slate-600">Formation:</span>
-                <span className="text-emerald-600 font-semibold">{selectedFormation}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-slate-600">Captain:</span>
-                <span className="text-amber-600 font-semibold truncate">
-                  {captain ? teamFormation[Object.keys(teamFormation).find(key => teamFormation[key]?._id === captain) || '']?.name || 'None' : 'None'}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-slate-600">Vice Captain:</span>
-                <span className="text-slate-600 font-semibold truncate">
-                  {viceCaptain ? teamFormation[Object.keys(teamFormation).find(key => teamFormation[key]?._id === viceCaptain) || '']?.name || 'None' : 'None'}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 xs:col-span-2 lg:col-span-1">
-                <span className="font-medium text-slate-500 text-xs">💡 Click players to manage</span>
+                              <span className="font-medium text-slate-600">{t('teamBuilder.formation')}:</span>
+              <span className="text-emerald-600 font-semibold">{selectedFormation}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-slate-600">{t('teamBuilder.captain')}:</span>
+              <span className="text-amber-600 font-semibold truncate">
+                {captain ? teamFormation[Object.keys(teamFormation).find(key => teamFormation[key]?._id === captain) || '']?.name || 'None' : 'None'}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-slate-600">{t('teamBuilder.viceCaptain')}:</span>
+              <span className="text-slate-600 font-semibold truncate">
+                {viceCaptain ? teamFormation[Object.keys(teamFormation).find(key => teamFormation[key]?._id === viceCaptain) || '']?.name || 'None' : 'None'}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 xs:col-span-2 lg:col-span-1">
+              <span className="font-medium text-slate-500 text-xs">{t('teamBuilder.clickPlayersToManage')}</span>
               </div>
             </div>
           </div>
@@ -803,7 +805,7 @@ export default function FormationPitch({
 
       {/* Team Summary */}
       <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-4 sm:p-6">
-        <h3 className="font-bold text-slate-800 mb-4 text-lg">Team Summary</h3>
+        <h3 className="font-bold text-slate-800 mb-4 text-lg">{t('teamBuilder.teamSummary')}</h3>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 text-sm">
           <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg p-3 border border-amber-200">
             <div className="flex items-center gap-2 mb-1">

@@ -1,0 +1,179 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "remove": "Remove",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "clear": "Clear",
+    "confirm": "Confirm",
+    "welcome": "Welcome"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signInShort": "Sign",
+    "signOut": "Sign Out",
+    "signOutShort": "Out"
+  },
+  "nav": {
+    "home": "Home",
+    "myRooms": "My Rooms",
+    "createRoom": "Create Room",
+    "teamBuilder": "Team Builder",
+    "admin": "Admin",
+    "signOut": "Sign Out"
+  },
+  "teamBuilder": {
+    "title": "Team Builder",
+    "formation": "Formation",
+    "captain": "Captain",
+    "viceCaptain": "Vice Captain",
+    "clearTeam": "Clear Team",
+    "saveTeam": "Save Team",
+    "teamSaved": "Team saved!",
+    "saveFailed": "Save failed",
+    "saving": "Saving...",
+    "deadlinePassed": "Deadline has passed - team changes are locked",
+    "teamComplete": "Team complete! Formation: {formation}",
+    "completeFormation": "Complete your {formation} formation and select captain & vice-captain",
+    "clickPlayersToManage": "💡 Click players to manage",
+    "selectPlayer": "Select {position}",
+    "choosePlayer": "Choose a player for this position",
+    "searchPlayers": "Search players...",
+    "byPoints": "By Points",
+    "byName": "By Name",
+    "makeCaptain": "Make Captain",
+    "makeViceCaptain": "Make Vice Captain",
+    "changePlayer": "Change Player",
+    "removePlayer": "Remove Player",
+    "captainShort": "CAPT",
+    "captainAbbrev": "Capt",
+    "viceShort": "VICE",
+    "viceAbbrev": "Vice",
+    "change": "Change",
+    "pts": "pts",
+    "goalkeeper": "Goalkeeper",
+    "defender": "Defender", 
+    "midfielder": "Midfielder",
+    "forward": "Forward",
+    "signInRequired": "Please sign in to build your team",
+    "signInToSave": "Please sign in to save your team.",
+    "loadingProfile": "Loading your profile...",
+    "noActiveGameweek": "No Active Gameweek",
+    "noActiveGameweekDesc": "There's currently no active gameweek for {league}. Please check back later or contact support.",
+    "settingUpLeague": "Setting up your default league...",
+    "teamSummary": "Team Summary",
+    "saveTeam": "Save Team",
+    "teamSaved": "Team saved!",
+    "saveFailed": "Save failed",
+    "saving": "Saving..."
+  },
+  "positions": {
+    "GK": "GK",
+    "DEF": "DEF", 
+    "MID": "MID",
+    "FWD": "FWD"
+  },
+  "tournaments": {
+    "premier_league": "Premier League",
+    "la_liga": "La Liga",
+    "champions_league": "Champions League"
+  },
+  "rooms": {
+    "createNew": "Create New Room",
+    "joinRoom": "Join Room",
+    "roomCode": "Room Code",
+    "roomName": "Room Name",
+    "members": "Members",
+    "viewTeam": "View Team",
+    "buildTeam": "Build Team",
+    "myRooms": "My Rooms",
+    "title": "My Rooms",
+    "description": "Manage your created and joined fantasy soccer rooms",
+    "signInRequired": "Sign In Required",
+    "signInToView": "Please sign in to view your rooms",
+    "signIn": "Sign In",
+    "loading": "Loading your rooms...",
+    "noRoomsYet": "No Rooms Yet",
+    "noRoomsDesc": "Create your first room or join one using a room code to get started!",
+    "createFirstRoom": "Create Your First Room",
+    "roomsYouCreated": "Rooms You Created",
+    "roomsYouJoined": "Rooms You Joined",
+    "createdBy": "Created by",
+    "yourPoints": "Your Points",
+    "yourRank": "Your Rank",
+    "manageRoom": "Manage Room →",
+    "viewRoom": "View Room →",
+    "backToHome": "← Back to Home"
+  },
+  "home": {
+    "title": "Fantasy Soccer",
+    "subtitle": "Unlimited. Unrestricted. Unbeatable.",
+    "description": "Break free from budget limits and team restrictions. Build your dream team with any players, from any club, and compete in the most flexible fantasy soccer experience ever created.",
+    "createRoomAndInvite": "🎮 Create Room & Invite Friends",
+    "viewMyRooms": "🏟️ View My Rooms",
+    "features": {
+      "noBudgetLimits": {
+        "title": "No Budget Limits",
+        "description": "Select Messi, Ronaldo, and Mbappé all in one team. No artificial budget constraints holding you back."
+      },
+      "liveSubstitutions": {
+        "title": "Live Substitutions",
+        "description": "Make strategic substitutions between match days with your weekly tokens. Adapt as the action unfolds."
+      },
+      "realTimeScoring": {
+        "title": "Real-Time Scoring",
+        "description": "Watch your players light up as they score. Get points within seconds of real match events."
+      }
+    },
+    "howItWorks": {
+      "title": "🏆 How It Works",
+      "steps": {
+        "pickPlayers": {
+          "title": "Pick 15 Players",
+          "description": "11 starters + 4 subs from any team, any league"
+        },
+        "chooseCaptain": {
+          "title": "Choose Captain",
+          "description": "Double points for your captain's performance"
+        },
+        "earnPoints": {
+          "title": "Earn Points",
+          "description": "Goals, assists, clean sheets, and bonus points"
+        },
+        "compete": {
+          "title": "Compete",
+          "description": "Join leagues with friends or play publicly"
+        }
+      }
+    },
+    "availableLeagues": "🌍 Available Leagues",
+    "leagues": {
+      "premierLeague": {
+        "title": "⚽ Premier League",
+        "description": "The world's most exciting league"
+      },
+      "laLiga": {
+        "title": "🇪🇸 La Liga",
+        "description": "Spanish football excellence"
+      },
+      "championsLeague": {
+        "title": "🏆 Champions League",
+        "description": "Europe's premier competition"
+      }
+    },
+    "cta": {
+      "title": "Ready to Dominate Fantasy Soccer?",
+      "description": "Create your room and start building your dream team with friends",
+      "createFirstRoom": "🚀 Create Your First Room"
+    }
+  }
+} 

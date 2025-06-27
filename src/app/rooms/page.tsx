@@ -7,8 +7,10 @@ import { api } from '../../../convex/_generated/api'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import type { Id } from "../../../convex/_generated/dataModel"
+import { useTranslation } from '@/lib/i18n'
 
 export default function MyRooms() {
+  const { t } = useTranslation();
   const { user } = useUser()
   const [userConvexId, setUserConvexId] = useState<Id<"users"> | null>(null)
 
@@ -46,11 +48,11 @@ export default function MyRooms() {
       <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900">
         <div className="text-center max-w-md mx-auto bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
           <div className="text-6xl mb-4">⚽</div>
-          <h1 className="text-2xl font-bold mb-4 text-white">Sign In Required</h1>
-          <p className="text-emerald-100 mb-6">Please sign in to view your rooms</p>
+          <h1 className="text-2xl font-bold mb-4 text-white">{t('rooms.signInRequired')}</h1>
+          <p className="text-emerald-100 mb-6">{t('rooms.signInToView')}</p>
           <Link href="/sign-in">
             <Button className="w-full bg-emerald-600 hover:bg-emerald-700">
-              Sign In
+              {t('rooms.signIn')}
             </Button>
           </Link>
         </div>
@@ -63,7 +65,7 @@ export default function MyRooms() {
       <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white">Loading your rooms...</p>
+          <p className="text-white">{t('rooms.loading')}</p>
         </div>
       </div>
     )
@@ -91,15 +93,15 @@ export default function MyRooms() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="text-6xl mb-4">🏟️</div>
-          <h1 className="text-3xl font-bold text-white mb-2">My Rooms</h1>
-          <p className="text-emerald-100">Manage your created and joined fantasy soccer rooms</p>
+          <h1 className="text-3xl font-bold text-white mb-2">{t('rooms.title')}</h1>
+          <p className="text-emerald-100">{t('rooms.description')}</p>
         </div>
 
         {/* Quick Actions */}
         <div className="flex flex-col sm:flex-row gap-4 mb-8 justify-center">
           <Link href="/rooms/create">
             <Button className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700">
-              ➕ Create New Room
+              ➕ {t('rooms.createNew')}
             </Button>
           </Link>
         </div>
@@ -108,14 +110,14 @@ export default function MyRooms() {
         {userLeagues.length === 0 && (
           <div className="text-center max-w-md mx-auto bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
             <div className="text-6xl mb-4">🎯</div>
-            <h2 className="text-xl font-bold text-white mb-4">No Rooms Yet</h2>
+            <h2 className="text-xl font-bold text-white mb-4">{t('rooms.noRoomsYet')}</h2>
             <p className="text-emerald-100 mb-6">
-              Create your first room or join one using a room code to get started!
+              {t('rooms.noRoomsDesc')}
             </p>
             <div className="space-y-3">
               <Link href="/rooms/create">
                 <Button className="w-full bg-emerald-600 hover:bg-emerald-700">
-                  Create Your First Room
+                  {t('rooms.createFirstRoom')}
                 </Button>
               </Link>
             </div>
@@ -126,7 +128,7 @@ export default function MyRooms() {
         {createdRooms.length > 0 && (
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
-              👑 Rooms You Created ({createdRooms.length})
+              👑 {t('rooms.roomsYouCreated')} ({createdRooms.length})
             </h2>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {createdRooms.map((league) => (
@@ -145,16 +147,16 @@ export default function MyRooms() {
 
                   <div className="space-y-2 mb-4">
                     <div className="flex justify-between text-sm">
-                      <span className="text-emerald-200">Members:</span>
+                      <span className="text-emerald-200">{t('rooms.members')}:</span>
                       <span className="text-white font-medium">{league.currentParticipants}/{league.maxParticipants}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-emerald-200">Your Points:</span>
+                      <span className="text-emerald-200">{t('rooms.yourPoints')}:</span>
                       <span className="text-white font-medium">{league.userPoints || 0}</span>
                     </div>
                     {league.userRank && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-emerald-200">Your Rank:</span>
+                        <span className="text-emerald-200">{t('rooms.yourRank')}:</span>
                         <span className="text-white font-medium">#{league.userRank}</span>
                       </div>
                     )}
@@ -162,7 +164,7 @@ export default function MyRooms() {
 
                   <Link href={`/rooms/${league._id}`}>
                     <Button className="w-full bg-emerald-600 hover:bg-emerald-700">
-                      Manage Room →
+                      {t('rooms.manageRoom')}
                     </Button>
                   </Link>
                 </div>
@@ -175,7 +177,7 @@ export default function MyRooms() {
         {joinedRooms.length > 0 && (
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
-              🤝 Rooms You Joined ({joinedRooms.length})
+              🤝 {t('rooms.roomsYouJoined')} ({joinedRooms.length})
             </h2>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {joinedRooms.map((league) => (
@@ -194,20 +196,20 @@ export default function MyRooms() {
 
                   <div className="space-y-2 mb-4">
                     <div className="flex justify-between text-sm">
-                      <span className="text-emerald-200">Created by:</span>
+                      <span className="text-emerald-200">{t('rooms.createdBy')}:</span>
                       <span className="text-white font-medium">{league.creator?.name}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-emerald-200">Members:</span>
+                      <span className="text-emerald-200">{t('rooms.members')}:</span>
                       <span className="text-white font-medium">{league.currentParticipants}/{league.maxParticipants}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-emerald-200">Your Points:</span>
+                      <span className="text-emerald-200">{t('rooms.yourPoints')}:</span>
                       <span className="text-white font-medium">{league.userPoints || 0}</span>
                     </div>
                     {league.userRank && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-emerald-200">Your Rank:</span>
+                        <span className="text-emerald-200">{t('rooms.yourRank')}:</span>
                         <span className="text-white font-medium">#{league.userRank}</span>
                       </div>
                     )}
@@ -215,7 +217,7 @@ export default function MyRooms() {
 
                   <Link href={`/rooms/${league._id}`}>
                     <Button className="w-full bg-blue-600 hover:bg-blue-700">
-                      View Room →
+                      {t('rooms.viewRoom')}
                     </Button>
                   </Link>
                 </div>
@@ -227,7 +229,7 @@ export default function MyRooms() {
         {/* Back to Home */}
         <div className="mt-8 text-center">
           <Link href="/" className="text-emerald-200 hover:text-white transition-colors">
-            ← Back to Home
+            {t('rooms.backToHome')}
           </Link>
         </div>
       </div>

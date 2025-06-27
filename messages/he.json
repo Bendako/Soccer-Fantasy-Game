@@ -1,0 +1,179 @@
+{
+  "common": {
+    "loading": "טוען...",
+    "save": "שמור",
+    "cancel": "בטל",
+    "edit": "עריכה",
+    "delete": "מחק",
+    "remove": "הסר",
+    "close": "סגור",
+    "back": "חזור",
+    "next": "הבא",
+    "previous": "קודם",
+    "search": "חיפוש",
+    "filter": "סינון",
+    "sort": "מיון",
+    "clear": "נקה",
+    "confirm": "אישור",
+    "welcome": "ברוכים הבאים"
+  },
+  "auth": {
+    "signIn": "התחבר",
+    "signInShort": "התחבר",
+    "signOut": "התנתק",
+    "signOutShort": "התנתק"
+  },
+  "nav": {
+    "home": "בית",
+    "myRooms": "החדרים שלי",
+    "createRoom": "צור חדר",
+    "teamBuilder": "בונה הקבוצה",
+    "admin": "ניהול",
+    "signOut": "התנתק"
+  },
+  "teamBuilder": {
+    "title": "בונה הקבוצה",
+    "formation": "מערך",
+    "captain": "קפטן",
+    "viceCaptain": "סגן קפטן",
+    "clearTeam": "נקה קבוצה",
+    "saveTeam": "שמור קבוצה",
+    "teamSaved": "הקבוצה נשמרה!",
+    "saveFailed": "השמירה נכשלה",
+    "saving": "שומר...",
+    "deadlinePassed": "המועד האחרון עבר - שינויי הקבוצה נחסמו",
+    "teamComplete": "הקבוצה הושלמה! מערך: {formation}",
+    "completeFormation": "השלם את מערך ה-{formation} ובחר קפטן וסגן קפטן",
+    "clickPlayersToManage": "💡 לחץ על שחקנים לניהול",
+    "selectPlayer": "בחר {position}",
+    "choosePlayer": "בחר שחקן לעמדה זו",
+    "searchPlayers": "חפש שחקנים...",
+    "byPoints": "לפי נקודות",
+    "byName": "לפי שם",
+    "makeCaptain": "הפוך לקפטן",
+    "makeViceCaptain": "הפוך לסגן קפטן",
+    "changePlayer": "החלף שחקן",
+    "removePlayer": "הסר שחקן",
+    "captainShort": "קפטן",
+    "captainAbbrev": "קפט'",
+    "viceShort": "סגן",
+    "viceAbbrev": "סגן",
+    "change": "החלף",
+    "pts": "נק'",
+    "goalkeeper": "שוער",
+    "defender": "מגן", 
+    "midfielder": "קשר",
+    "forward": "חלוץ",
+    "signInRequired": "אנא התחבר כדי לבנות את הקבוצה שלך",
+    "signInToSave": "אנא התחבר כדי לשמור את הקבוצה שלך.",
+    "loadingProfile": "טוען את הפרופיל שלך...",
+    "noActiveGameweek": "אין שבוע משחקים פעיל",
+    "noActiveGameweekDesc": "כרגע אין שבוע משחקים פעיל עבור {league}. אנא בדוק שוב מאוחר יותר או פנה לתמיכה.",
+    "settingUpLeague": "מגדיר את הליגה הברירת מחדל שלך...",
+    "teamSummary": "סיכום הקבוצה",
+    "saveTeam": "שמור קבוצה",
+    "teamSaved": "הקבוצה נשמרה!",
+    "saveFailed": "השמירה נכשלה",
+    "saving": "שומר..."
+  },
+  "positions": {
+    "GK": "שוער",
+    "DEF": "מגן", 
+    "MID": "קשר",
+    "FWD": "חלוץ"
+  },
+  "tournaments": {
+    "premier_league": "ליגת העל האנגלית",
+    "la_liga": "לה ליגה",
+    "champions_league": "ליגת האלופות"
+  },
+  "rooms": {
+    "createNew": "צור חדר חדש",
+    "joinRoom": "הצטרף לחדר",
+    "roomCode": "קוד חדר",
+    "roomName": "שם החדר",
+    "members": "חברים",
+    "viewTeam": "צפה בקבוצה",
+    "buildTeam": "בנה קבוצה",
+    "myRooms": "החדרים שלי",
+    "title": "החדרים שלי",
+    "description": "נהל את החדרים שיצרת והצטרפת אליהם",
+    "signInRequired": "נדרשת התחברות",
+    "signInToView": "אנא התחבר כדי לצפות בחדרים שלך",
+    "signIn": "התחבר",
+    "loading": "טוען את החדרים שלך...",
+    "noRoomsYet": "עדיין אין חדרים",
+    "noRoomsDesc": "צור את החדר הראשון שלך או הצטרף לחדר באמצעות קוד חדר כדי להתחיל!",
+    "createFirstRoom": "צור את החדר הראשון שלך",
+    "roomsYouCreated": "חדרים שיצרת",
+    "roomsYouJoined": "חדרים שהצטרפת אליהם",
+    "createdBy": "נוצר על ידי",
+    "yourPoints": "הנקודות שלך",
+    "yourRank": "הדירוג שלך",
+    "manageRoom": "נהל חדר ←",
+    "viewRoom": "צפה בחדר ←",
+    "backToHome": "← חזור לעמוד הבית"
+  },
+  "home": {
+    "title": "פנטזי כדורגל",
+    "subtitle": "ללא גבולות. ללא הגבלות. ללא תחרות.",
+    "description": "השתחרר ממגבלות תקציב והגבלות קבוצה. בנה את קבוצת החלומות שלך עם כל שחקן, מכל מועדון, והתחרה בחוויית הפנטזי כדורגל הגמישה ביותר שנוצרה אי פעם.",
+    "createRoomAndInvite": "🎮 צור חדר והזמן חברים",
+    "viewMyRooms": "🏟️ צפה בחדרים שלי",
+    "features": {
+      "noBudgetLimits": {
+        "title": "ללא מגבלות תקציב",
+        "description": "בחר מסי, רונאלדו ומבאפה כולם בקבוצה אחת. ללא מגבלות תקציב מלאכותיות שמעכבות אותך."
+      },
+      "liveSubstitutions": {
+        "title": "החלפות בזמן אמת",
+        "description": "בצע החלפות אסטרטגיות בין ימי המשחק עם הטוקנים השבועיים שלך. הסתגל בזמן שהפעולה מתרחשת."
+      },
+      "realTimeScoring": {
+        "title": "ניקוד בזמן אמת",
+        "description": "צפה בשחקנים שלך נדלקים כשהם כובשים. קבל נקודות תוך שניות מאירועי המשחק האמיתיים."
+      }
+    },
+    "howItWorks": {
+      "title": "🏆 איך זה עובד",
+      "steps": {
+        "pickPlayers": {
+          "title": "בחר 15 שחקנים",
+          "description": "11 בסיסיים + 4 מחליפים מכל קבוצה, כל ליגה"
+        },
+        "chooseCaptain": {
+          "title": "בחר קפטן",
+          "description": "נקודות כפולות לביצועי הקפטן שלך"
+        },
+        "earnPoints": {
+          "title": "צבור נקודות",
+          "description": "שערים, בישולים, שערים נקיים ונקודות בונוס"
+        },
+        "compete": {
+          "title": "התחרה",
+          "description": "הצטרף לליגות עם חברים או שחק בציבור"
+        }
+      }
+    },
+    "availableLeagues": "🌍 ליגות זמינות",
+    "leagues": {
+      "premierLeague": {
+        "title": "⚽ ליגת העל האנגלית",
+        "description": "הליגה המרגשת ביותר בעולם"
+      },
+      "laLiga": {
+        "title": "🇪🇸 לה ליגה",
+        "description": "מצוינות כדורגל ספרדית"
+      },
+      "championsLeague": {
+        "title": "🏆 ליגת האלופות",
+        "description": "התחרות המובילה של אירופה"
+      }
+    },
+    "cta": {
+      "title": "מוכן לשלוט בפנטזי כדורגל?",
+      "description": "צור את החדר שלך והתחל לבנות את קבוצת החלומות שלך עם חברים",
+      "createFirstRoom": "🚀 צור את החדר הראשון שלך"
+    }
+  }
+} 

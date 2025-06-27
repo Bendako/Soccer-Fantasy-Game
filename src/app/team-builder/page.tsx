@@ -9,6 +9,7 @@ import { api } from '../../../convex/_generated/api'
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import type { Id } from "../../../convex/_generated/dataModel"
+import { useTranslation } from '@/lib/i18n'
 
 const TOURNAMENTS = {
   premier_league: {
@@ -33,6 +34,7 @@ type TournamentKey = keyof typeof TOURNAMENTS
 function TeamBuilderContent() {
   const { user } = useUser()
   const searchParams = useSearchParams()
+  const { t } = useTranslation()
   
   // Get the league from URL params, default to premier_league if not provided or invalid
   const getDefaultLeague = (): TournamentKey => {
@@ -144,8 +146,8 @@ function TeamBuilderContent() {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="text-center max-w-md mx-auto">
-          <h1 className="text-xl sm:text-2xl font-bold mb-4 text-white">Please sign in to build your team</h1>
-          <p className="text-emerald-100 mb-6">You need to be signed in to access the team builder.</p>
+          <h1 className="text-xl sm:text-2xl font-bold mb-4 text-white">{t('teamBuilder.signInRequired')}</h1>
+          <p className="text-emerald-100 mb-6">{t('teamBuilder.signInToSave')}</p>
           <Link href="/">
             <Button className="w-full sm:w-auto" variant="outline">← Back to Home</Button>
           </Link>
@@ -160,7 +162,7 @@ function TeamBuilderContent() {
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white">Loading your profile...</p>
+          <p className="text-white">{t('teamBuilder.loadingProfile')}</p>
         </div>
       </div>
     )
@@ -171,10 +173,9 @@ function TeamBuilderContent() {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="text-center max-w-md mx-auto">
-          <h1 className="text-xl sm:text-2xl font-bold mb-4 text-white">No Active Gameweek</h1>
+          <h1 className="text-xl sm:text-2xl font-bold mb-4 text-white">{t('teamBuilder.noActiveGameweek')}</h1>
           <p className="text-emerald-100 mb-6">
-                         There&apos;s currently no active gameweek for {selectedLeague.replace('_', ' ').toUpperCase()}. 
-            Please check back later or contact support.
+            {t('teamBuilder.noActiveGameweekDesc', { league: selectedLeague.replace('_', ' ').toUpperCase() })}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/">
@@ -195,7 +196,7 @@ function TeamBuilderContent() {
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white">Setting up your default league...</p>
+          <p className="text-white">{t('teamBuilder.settingUpLeague')}</p>
         </div>
       </div>
     )

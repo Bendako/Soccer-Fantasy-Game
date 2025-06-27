@@ -29,6 +29,25 @@ body {
 @tailwind components;
 @tailwind utilities;
 
+/* Prevent layout shift when changing languages */
+html {
+  direction: ltr; /* Always keep document direction as LTR */
+}
+
+/* Hebrew text styling when needed */
+[data-locale="he"] .hebrew-text {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Ensure consistent button and component sizing */
+.lang-toggle {
+  min-width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Mobile optimizations */
 @layer base {
   html {
